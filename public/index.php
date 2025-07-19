@@ -1,48 +1,73 @@
 <?php
 
-// Incluye el archivo central
+// Se incluye el archivo 'core.php', que contiene la configuración básica y las clases principales.
 require_once __DIR__ . '/../core.php';
 
-// Incluye los controladores que se usarán en todo el enrutador
+// Se incluyen todos los controladores. Esto se hace al principio para que estén disponibles
+// para todas las acciones en el 'switch'. Es una buena práctica en este patrón.
 require_once ROOT_PATH . '/controllers/AuthController.php';
 require_once ROOT_PATH . '/controllers/EventoController.php';
 require_once ROOT_PATH . '/controllers/AdminController.php';
 
+// Se determina la 'acción' a realizar a partir del parámetro 'action' en la URL.
+// Si no se especifica ninguna, la acción por defecto es 'home'.
 $action = $_GET['action'] ?? 'home';
 
 // =========================================================================
-// Instanciar los controladores antes de cualquier lógica
+// Se instancian los controladores. Estos objetos contienen la lógica de negocio.
 // =========================================================================
 $authController = new AuthController($pdo);
 $eventoController = new EventoController($pdo);
 $adminController = new AdminController($pdo);
 // =========================================================================
 
-// Lógica de autenticación y autorización para el panel de administración
-$admin_actions = ['admin_dashboard', 'admin_eventos_list', 'admin_evento_form', 'admin_guardar_evento', 'admin_eliminar_evento', 'admin_usuarios_list', 'admin_cambiar_rol'];
+// --- Lógica de seguridad: Autenticación y Autorización para el panel de administración ---
+// Se define un array de acciones que solo los administradores pueden realizar.
+$admin_actions = ['admin_dashboard', 'admin_eventos_list', 'admin_evento_form', 'admin_guardar_evento', 'admin_eliminar_evento', 'admin_usuarios_list', 'admin_cambiar_rol', 'admin_qr_validator', 'admin_validar_qr'];
 $is_admin_action = in_array($action, $admin_actions);
 
+// Si la acción solicitada es para el área de administración, se verifica si el usuario está
+// logueado y si su rol es 'admin'. Si no cumple, se le redirige al login.
 if ($is_admin_action) {
     if (!isset($_SESSION['loggedin']) || $_SESSION['rol'] !== 'admin') {
-        // Redirigir a login si no está logueado o no es admin
         header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
         exit();
     }
 }
+// --- Fin de la lógica de seguridad ---
+
+// =========================================================================
+// El enrutador principal: El 'switch' dirige la petición a la acción correcta.
+// =========================================================================
 
 switch ($action) {
     // --- LÓGICA DE AUTENTICACIÓN ---
     case 'register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Se obtienen y se limpian los datos del formulario.
             $nombre = trim($_POST['nombre'] ?? '');
             $apellidos = trim($_POST['apellidos'] ?? '');
             $telefono = trim($_POST['telefono'] ?? '');
             $correo = trim($_POST['correo'] ?? '');
             $id_empleado = trim($_POST['id_empleado'] ?? '');
             $password = $_POST['password'] ?? '';
+            $acepta_contacto = isset($_POST['acepta_contacto']) ? 1 : 0;
 
-            $resultado = $authController->registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password);
+            // Se llama al controlador para procesar la lógica de registro.
+            $resultado = $authController->registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto);
 
+            // Se detecta si la solicitud es AJAX (sin recarga de página).
+            if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
+                // Si es AJAX, se envía una respuesta JSON.
+                if ($resultado === true) {
+                    echo json_encode(['success' => true, 'message' => '¡Registro exitoso! Ahora puedes iniciar sesión.']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => $resultado]);
+                }
+                exit(); // Es crucial salir después de enviar la respuesta JSON
+            }
+
+            // Si no es una solicitud AJAX, el código de redirección se mantiene
             if ($resultado === true) {
                 $_SESSION['registro_exito'] = true;
                 $_SESSION['registro_mensaje'] = "¡Registro exitoso! Ya puedes iniciar sesión.";
@@ -60,6 +85,7 @@ switch ($action) {
         }
         break;
 
+    // --- LÓGICA DE LOGIN ---
     case 'login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $correo = trim($_POST['correo'] ?? '');
@@ -249,8 +275,10 @@ switch ($action) {
         require_once ROOT_PATH . '/views/login.php';
         break;
 
+    // --- PÁGINA PRINCIPAL ---
     case 'home':
     default:
+        // Si el usuario ya está logueado, lo enviamos a su página de inicio
         if (isset($_SESSION['loggedin'])) {
             if ($_SESSION['rol'] === 'admin') {
                 header("Location: " . $_SERVER['PHP_SELF'] . "?action=admin_dashboard");
@@ -259,7 +287,8 @@ switch ($action) {
             }
             exit();
         }
-        header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
+        // Si no, lo enviamos al formulario de registro
+        header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_register_form");
         exit();
         break;
 }

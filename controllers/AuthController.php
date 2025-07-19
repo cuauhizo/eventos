@@ -1,86 +1,104 @@
 <?php
-// Usamos ROOT_PATH que ya definimos
-// require_once __DIR__ . '/../config/constants.php'; // Incluye la constante ROOT_PATH
-// require_once ROOT_PATH . '/config/database.php'; // Incluye la conexión a la base de datos
+// Este archivo actúa como el controlador de autenticación,
+// manejando toda la lógica de negocio relacionada con el registro e inicio de sesión.
+
+// Incluye el modelo de usuario, que maneja la interacción con la base de datos.
+require_once ROOT_PATH . '/models/Usuario.php';
 
 class AuthController {
-
-    private $pdo;
+    // La propiedad 'usuarioModel' contendrá una instancia de la clase Usuario.
+    // Esto es un ejemplo de Inyección de Dependencias.
+    private $usuarioModel;
 
     public function __construct($pdo) {
-        $this->pdo = $pdo;
+        // Al crear el controlador, se le pasa la conexión a la base de datos ($pdo),
+        // y se usa para inicializar el modelo de usuario.
+        $this->usuarioModel = new Usuario($pdo);
     }
 
-    public function registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password) {
-        // Validaciones básicas (puedes añadir más, como longitud mínima, etc.)
+    /**
+     * Registra a un nuevo usuario en el sistema.
+     * @param string $nombre, $apellidos, etc. Los datos del usuario.
+     * @param int $acepta_contacto 1 si acepta, 0 si no.
+     * @return bool|string Retorna true si el registro fue exitoso, o un mensaje de error si falló.
+     */
+    public function registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto) {
+        // --- Validaciones del lado del servidor (cruciales para la seguridad) ---
+        // 1. Verificación de que los campos obligatorios no estén vacíos.
         if (empty($nombre) || empty($apellidos) || empty($telefono) || empty($correo) || empty($id_empleado) || empty($password)) {
             return "Todos los campos son obligatorios.";
         }
+        
+        // 2. Validaciones de formato con expresiones regulares.
+        // ^[\p{L}\s]+$ :
+        // ^    -> Inicia la cadena.
+        // [\p{L}\s]+ -> Acepta una o más letras de cualquier idioma (\p{L}) o espacios (\s).
+        // $    -> Termina la cadena.
+        // /u   -> Modificador que permite el soporte para caracteres Unicode (como acentos, ñ, etc.).
+        if (!preg_match("/^[\p{L}\s]+$/u", $nombre)) {
+            return "El nombre solo puede contener letras y espacios.";
+        }
+        if (!preg_match("/^[\p{L}\s]+$/u", $apellidos)) {
+            return "Los apellidos solo pueden contener letras y espacios.";
+        }
+        if (!preg_match("/^[0-9]+$/", $telefono)) {
+            return "El teléfono solo puede contener números.";
+        }
+        if (!preg_match("/^[A-Za-z0-9]+$/", $id_empleado)) {
+            return "El ID de empleado solo puede contener letras y números.";
+        }
 
+        // 3. Validación del formato de correo electrónico.
         if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
             return "El formato del correo electrónico no es válido.";
         }
 
-        // Verificar si el correo o ID de empleado ya existen
-        if ($this->existeUsuario($correo, $id_empleado)) {
-            return "El correo electrónico o el ID de empleado ya están registrados.";
+        // 4. Validación de la regla de negocio (dominios permitidos).
+        if (substr($correo, -9) !== '@nike.com') {
+            return "Solo se aceptan correos electrónicos con el dominio @nike.com.";
         }
 
-        // Hashear la contraseña antes de guardarla en la base de datos
-        $password_hash = password_hash($password, PASSWORD_DEFAULT);
-
-        $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password) VALUES (?, ?, ?, ?, ?, ?)";
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$nombre, $apellidos, $telefono, $correo, $id_empleado, $password_hash]);
-            return true; // Registro exitoso
-        } catch (PDOException $e) {
-            // En un entorno de producción, registrar el error en un log en lugar de mostrarlo
-            return "Error al registrar el usuario: " . $e->getMessage();
+        // 5. Verificación de unicidad del correo electrónico.
+        if ($this->usuarioModel->existeUsuario($correo)) {
+            return "El correo electrónico ya está registrado.";
         }
-    }
 
-    private function existeUsuario($correo, $id_empleado) {
-        $sql = "SELECT COUNT(*) FROM usuarios WHERE correo = ? OR id_empleado = ?";
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$correo, $id_empleado]);
-            return $stmt->fetchColumn() > 0;
-        } catch (PDOException $e) {
-            return false; // Manejo de error, asume que no existe para no bloquear
+        // 6. Cifrado de la contraseña.
+        // password_hash() usa un algoritmo de hashing seguro para que la contraseña
+        // nunca se guarde en texto plano, protegiendo a los usuarios.
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // 7. Llamada al modelo para ejecutar la inserción en la base de datos.
+        $exito = $this->usuarioModel->crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $hashed_password, $acepta_contacto);
+
+        if ($exito) {
+            return true;
+        } else {
+            return "Error al registrar el usuario. Inténtalo de nuevo.";
         }
     }
 
+    /**
+     * Inicia sesión de un usuario.
+     * @param string $correo El correo del usuario.
+     * @param string $password La contraseña en texto plano.
+     * @return bool|string Retorna true si el inicio de sesión es exitoso, o un mensaje de error.
+     */
     public function iniciarSesion($correo, $password) {
-        if (empty($correo) || empty($password)) {
-            return "El correo y la contraseña son obligatorios.";
-        }
+        // 1. Obtener los datos del usuario por su correo.
+        $usuario = $this->usuarioModel->obtenerUsuarioPorCorreo($correo);
 
-        $sql = "SELECT id_usuario, nombre, apellidos, rol, password FROM usuarios WHERE correo = ?";
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$correo]);
-            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$usuario) {
-                return "Credenciales incorrectas.";
-            }
-
-            if (password_verify($password, $usuario['password'])) {
-                // ¡AHORA GUARDAMOS MÁS INFORMACIÓN EN LA SESIÓN!
-                $_SESSION['id_usuario'] = $usuario['id_usuario'];
-                $_SESSION['loggedin'] = true;
-                $_SESSION['nombre'] = $usuario['nombre'];
-                $_SESSION['apellidos'] = $usuario['apellidos'];
-                $_SESSION['rol'] = $usuario['rol'];
-
-                return true;
-            } else {
-                return "Credenciales incorrectas.";
-            }
-        } catch (PDOException $e) {
-            return "Error al iniciar sesión: " . $e->getMessage();
+        // 2. Verificar si el usuario existe y si la contraseña es correcta.
+        // password_verify() compara la contraseña en texto plano con el hash guardado.
+        if ($usuario && password_verify($password, $usuario['password'])) {
+            // 3. Si es correcto, se inicia la sesión y se guardan los datos clave.
+            $_SESSION['loggedin'] = true;
+            $_SESSION['id_usuario'] = $usuario['id_usuario'];
+            $_SESSION['nombre'] = $usuario['nombre'];
+            $_SESSION['rol'] = $usuario['rol'];
+            return true;
+        } else {
+            return "Correo o contraseña incorrectos.";
         }
     }
 }
-?>

@@ -2,3 +2,4 @@
 /composer.lock
 /config/database.php
 /helpers/MailHelper.php
+/public/qrcodes/
