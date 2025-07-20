@@ -8,7 +8,7 @@ class Evento {
     }
     
     public function getEventosDisponibles() {
-        $sql = "SELECT e.*, c.nombre_categoria FROM eventos e JOIN categorias c ON e.id_categoria = c.id_categoria WHERE e.cupo_disponible > 0 ORDER BY e.fecha, e.hora_inicio ASC";
+        $sql = "SELECT e.*, c.nombre_categoria FROM eventos e JOIN categorias c ON e.id_categoria = c.id_categoria ORDER BY e.fecha, e.hora_inicio ASC";
         try {
             $stmt = $this->pdo->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -83,7 +83,7 @@ class Evento {
     
     // Método para obtener todos los eventos agrupados por categoría
     public function getEventosDisponiblesPorCategoria() {
-        $sql = "SELECT e.*, c.nombre_categoria FROM eventos e JOIN categorias c ON e.id_categoria = c.id_categoria WHERE e.cupo_disponible > 0 ORDER BY c.nombre_categoria ASC, e.fecha ASC, e.hora_inicio ASC";
+        $sql = "SELECT e.*, c.nombre_categoria FROM eventos e JOIN categorias c ON e.id_categoria = c.id_categoria ORDER BY c.nombre_categoria ASC, e.fecha ASC, e.hora_inicio ASC";
         try {
             $stmt = $this->pdo->query($sql);
             $eventos = $stmt->fetchAll(PDO::FETCH_ASSOC);
