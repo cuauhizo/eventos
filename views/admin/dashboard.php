@@ -25,7 +25,8 @@
         <div class="admin-header">
             <h1>Panel de Administración</h1>
             <div class="admin-menu">
-              <a href="../public/index.php?action=admin_qr_validator">Validar QR</a>
+              <!-- <a href="../public/index.php?action=admin_qr_validator">Validar QR</a> -->
+              <a href="../public/index.php?action=admin_import_form">Importar</a>
               <a href="../public/index.php?action=admin_eventos_list">Gestionar Eventos</a>
               <a href="../public/index.php?action=admin_usuarios_list">Gestionar Usuarios</a>
               <a href="../public/index.php?action=logout">Cerrar Sesión</a>

@@ -98,4 +98,49 @@ class Evento {
             return [];
         }
     }
+
+    public function importarEventos($file_path) {
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file_path);
+            $sheet = $spreadsheet->getActiveSheet();
+            $highestRow = $sheet->getHighestRow();
+
+            $this->pdo->beginTransaction();
+            
+            // Recorrer cada fila del archivo (desde la segunda, para omitir la cabecera)
+            for ($row = 2; $row <= $highestRow; $row++) {
+                $nombre_evento = $sheet->getCell('A' . $row)->getValue();
+                $id_categoria = (int) $sheet->getCell('B' . $row)->getValue();
+                $codigo_evento = $sheet->getCell('C' . $row)->getValue();
+                $descripcion = $sheet->getCell('D' . $row)->getValue();
+                $fecha = $sheet->getCell('E' . $row)->getFormattedValue();
+                $hora_inicio = $sheet->getCell('F' . $row)->getFormattedValue();
+                $hora_fin = $sheet->getCell('G' . $row)->getFormattedValue();
+                $ubicacion = $sheet->getCell('H' . $row)->getValue();
+                $cupo_maximo = (int) $sheet->getCell('I' . $row)->getValue();
+                $cupo_disponible = (int) $sheet->getCell('J' . $row)->getValue();
+
+                // Validaciones básicas antes de insertar
+                if (empty($nombre_evento) || empty($id_categoria) || empty($fecha) || empty($cupo_maximo)) {
+                    $this->pdo->rollBack();
+                    return "Error de validación en la fila " . $row . ". Campos obligatorios faltantes.";
+                }
+
+                // Insertar en la base de datos
+                $sql = "INSERT INTO eventos (nombre_evento, id_categoria, codigo_evento, descripcion, fecha, hora_inicio, hora_fin, ubicacion, cupo_maximo, cupo_disponible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    $nombre_evento, $id_categoria, $codigo_evento, $descripcion, $fecha, $hora_inicio, $hora_fin, $ubicacion, $cupo_maximo, $cupo_disponible
+                ]);
+            }
+            
+            $this->pdo->commit();
+            return true;
+
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Error de importación: " . $e->getMessage());
+            return "Error al importar el archivo: " . $e->getMessage();
+        }
+    }
 }

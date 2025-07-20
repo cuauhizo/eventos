@@ -112,4 +112,24 @@ class AdminController {
         $resultado = $this->reservacionModel->validarReservacionesPorGrupo($id_grupo);
         return $resultado;
     }
+
+    public function importarEventos($file) {
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return "Error al subir el archivo.";
+        }
+
+        $file_path = $file['tmp_name'];
+        $resultado = $this->eventoModel->importarEventos($file_path);
+
+        if ($resultado === true) {
+            $_SESSION['admin_mensaje'] = "El archivo se ha importado correctamente.";
+            $_SESSION['admin_exito'] = true;
+        } else {
+            $_SESSION['admin_mensaje'] = $resultado; // El modelo devuelve el mensaje de error.
+            $_SESSION['admin_exito'] = false;
+        }
+
+        return true;
+    }
+
 }

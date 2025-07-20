@@ -263,6 +263,24 @@ switch ($action) {
         $adminController->mostrarListaUsuarios();
         break;
 
+    case 'admin_import_form':
+        require_once ROOT_PATH . '/views/admin/import_form.php';
+        break;
+
+    case 'admin_import_events':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['eventos_file'])) {
+            $resultado = $adminController->importarEventos($_FILES['eventos_file']);
+            if ($resultado === true) {
+                // El controlador ya se encarga del mensaje
+            } else {
+                $_SESSION['import_mensaje'] = $resultado;
+                $_SESSION['import_exito'] = false;
+            }
+        }
+        header("Location: " . $_SERVER['PHP_SELF'] . "?action=admin_import_form");
+        exit();
+        break;
+
     // case 'admin_cambiar_rol':
     //     if (isset($_GET['id']) && isset($_GET['rol'])) {
     //         $id_usuario = $_GET['id'];
