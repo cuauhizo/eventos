@@ -1,50 +1,39 @@
 <?php
+// session_start();
 
-// Se incluye el archivo 'core.php', que contiene la configuración básica y las clases principales.
+// Incluye el archivo central
 require_once __DIR__ . '/../core.php';
 
-// Se incluyen todos los controladores. Esto se hace al principio para que estén disponibles
-// para todas las acciones en el 'switch'. Es una buena práctica en este patrón.
+// Incluye los controladores que se usarán en todo el enrutador
 require_once ROOT_PATH . '/controllers/AuthController.php';
 require_once ROOT_PATH . '/controllers/EventoController.php';
 require_once ROOT_PATH . '/controllers/AdminController.php';
 
-// Se determina la 'acción' a realizar a partir del parámetro 'action' en la URL.
-// Si no se especifica ninguna, la acción por defecto es 'home'.
 $action = $_GET['action'] ?? 'home';
 
 // =========================================================================
-// Se instancian los controladores. Estos objetos contienen la lógica de negocio.
+// Instanciar los controladores antes de cualquier lógica
 // =========================================================================
 $authController = new AuthController($pdo);
 $eventoController = new EventoController($pdo);
 $adminController = new AdminController($pdo);
 // =========================================================================
 
-// --- Lógica de seguridad: Autenticación y Autorización para el panel de administración ---
-// Se define un array de acciones que solo los administradores pueden realizar.
+// Lógica de autenticación y autorización para el panel de administración
 $admin_actions = ['admin_dashboard', 'admin_eventos_list', 'admin_evento_form', 'admin_guardar_evento', 'admin_eliminar_evento', 'admin_usuarios_list', 'admin_cambiar_rol', 'admin_qr_validator', 'admin_validar_qr'];
 $is_admin_action = in_array($action, $admin_actions);
 
-// Si la acción solicitada es para el área de administración, se verifica si el usuario está
-// logueado y si su rol es 'admin'. Si no cumple, se le redirige al login.
 if ($is_admin_action) {
     if (!isset($_SESSION['loggedin']) || $_SESSION['rol'] !== 'admin') {
         header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
         exit();
     }
 }
-// --- Fin de la lógica de seguridad ---
-
-// =========================================================================
-// El enrutador principal: El 'switch' dirige la petición a la acción correcta.
-// =========================================================================
 
 switch ($action) {
     // --- LÓGICA DE AUTENTICACIÓN ---
     case 'register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Se obtienen y se limpian los datos del formulario.
             $nombre = trim($_POST['nombre'] ?? '');
             $apellidos = trim($_POST['apellidos'] ?? '');
             $telefono = trim($_POST['telefono'] ?? '');
@@ -53,21 +42,17 @@ switch ($action) {
             $password = $_POST['password'] ?? '';
             $acepta_contacto = isset($_POST['acepta_contacto']) ? 1 : 0;
 
-            // Se llama al controlador para procesar la lógica de registro.
             $resultado = $authController->registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto);
 
-            // Se detecta si la solicitud es AJAX (sin recarga de página).
             if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
-                // Si es AJAX, se envía una respuesta JSON.
                 if ($resultado === true) {
                     echo json_encode(['success' => true, 'message' => '¡Registro exitoso! Ahora puedes iniciar sesión.']);
                 } else {
                     echo json_encode(['success' => false, 'message' => $resultado]);
                 }
-                exit(); // Es crucial salir después de enviar la respuesta JSON
+                exit();
             }
 
-            // Si no es una solicitud AJAX, el código de redirección se mantiene
             if ($resultado === true) {
                 $_SESSION['registro_exito'] = true;
                 $_SESSION['registro_mensaje'] = "¡Registro exitoso! Ya puedes iniciar sesión.";
@@ -85,16 +70,13 @@ switch ($action) {
         }
         break;
 
-    // --- LÓGICA DE LOGIN ---
     case 'login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $correo = trim($_POST['correo'] ?? '');
-            $password = $_POST['password'] ?? '';
+            $password = trim($_POST['password'] ?? '');
 
             $resultado = $authController->iniciarSesion($correo, $password);
             if ($resultado === true) {
-                // El método iniciarSesion ya guarda toda la información necesaria en la sesión
-                // Redirige al dashboard si es admin, o a eventos si es usuario normal
                 if ($_SESSION['rol'] === 'admin') {
                     header("Location: " . $_SERVER['PHP_SELF'] . "?action=admin_dashboard");
                 } else {
@@ -118,7 +100,8 @@ switch ($action) {
 
     // --- ACCIONES DE USUARIO ---
     case 'eventos':
-        $eventos = $eventoController->getEventosDisponibles();
+        // **CORRECCIÓN AQUÍ:** Ya no se obtiene una lista de categorías separada
+        $eventos_agrupados = $eventoController->getEventosDisponiblesPorCategoria();
         require_once ROOT_PATH . '/views/eventos.php';
         break;
 
@@ -136,17 +119,14 @@ switch ($action) {
             $id_usuario = $_SESSION['id_usuario'];
             $eventos_seleccionados = $_POST['eventos_seleccionados'] ?? [];
             
-            $resultado = $eventoController->procesarReservacion($id_usuario, $eventos_seleccionados);
-
-            // var_dump($resultado);
-            // exit;
-
+            $eventoController->eliminarReservasPendientes($id_usuario);
             
-            // if (is_int($resultado)) { // Si el resultado es un entero, es el ID del grupo
-            if (is_numeric($resultado)) { 
+            $resultado = $eventoController->procesarReservacion($id_usuario, $eventos_seleccionados);
+            
+            if (is_numeric($resultado)) {
                 $_SESSION['reserva_exito'] = true;
                 $_SESSION['reserva_mensaje'] = "Tu reservación ha sido pre-confirmada. Por favor, confirma a continuación para finalizar y recibir tu QR.";
-                $_SESSION['id_grupo'] = $resultado;
+                $_SESSION['id_grupo'] = (int) $resultado;
                 header("Location: " . $_SERVER['PHP_SELF'] . "?action=resumen_reservas");
                 exit();
             } else {
@@ -168,6 +148,8 @@ switch ($action) {
             exit();
         }
         $reservaciones = $eventoController->getReservacionesPorGrupo($id_grupo);
+        $eventos_seleccionados_ids = array_column($reservaciones, 'id_evento');
+        $_SESSION['eventos_preseleccionados'] = $eventos_seleccionados_ids;
         require_once ROOT_PATH . '/views/resumen.php';
         break;
 
@@ -191,6 +173,17 @@ switch ($action) {
             header("Location: " . $_SERVER['PHP_SELF'] . "?action=resumen_reservas");
             exit();
         }
+        break;
+
+    case 'cancelar_reserva':
+        if (!isset($_SESSION['id_usuario']) || !isset($_GET['id'])) {
+            header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
+            exit();
+        }
+        $id_reservacion = $_GET['id'];
+        $eventoController->cancelarReservacion($id_reservacion);
+        header("Location: " . $_SERVER['PHP_SELF'] . "?action=mis_reservas");
+        exit();
         break;
 
     // --- ACCIONES DEL PANEL DE ADMINISTRACIÓN ---
@@ -246,11 +239,11 @@ switch ($action) {
         exit();
         break;
 
-     case 'admin_qr_validator': // NUEVO: Muestra el formulario del validador
+    case 'admin_qr_validator':
         require_once ROOT_PATH . '/views/admin/qr_validator.php';
         break;
     
-    case 'admin_validar_qr': // NUEVO: Procesa la validación del QR
+    case 'admin_validar_qr':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $qr_content = $_POST['qr_content'] ?? '';
             $resultado = $adminController->validarQR($qr_content);
@@ -266,6 +259,20 @@ switch ($action) {
         exit();
         break;
 
+    case 'admin_usuarios_list':
+        $adminController->mostrarListaUsuarios();
+        break;
+
+    // case 'admin_cambiar_rol':
+    //     if (isset($_GET['id']) && isset($_GET['rol'])) {
+    //         $id_usuario = $_GET['id'];
+    //         $nuevo_rol = $_GET['rol'];
+    //         $adminController->cambiarRolUsuario($id_usuario, $nuevo_rol);
+    //     }
+    //     header("Location: " . $_SERVER['PHP_SELF'] . "?action=admin_usuarios_list");
+    //     exit();
+    //     break;
+
     // --- ACCIONES PARA MOSTRAR VISTAS ---
     case 'show_register_form':
         require_once ROOT_PATH . '/views/registro.php';
@@ -274,7 +281,7 @@ switch ($action) {
     case 'show_login_form':
         require_once ROOT_PATH . '/views/login.php';
         break;
-
+        
     // --- PÁGINA PRINCIPAL ---
     case 'home':
     default:

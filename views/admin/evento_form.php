@@ -10,7 +10,7 @@
         h1 { text-align: center; color: #333; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea {
+        input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea, select {
             width: calc(100% - 22px); padding: 10px; border: 1px solid #ddd; border-radius: 4px;
         }
         button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
@@ -35,6 +35,21 @@
                 <input type="text" id="nombre_evento" name="nombre_evento" value="<?php echo $evento ? htmlspecialchars($evento['nombre_evento']) : ''; ?>" required>
             </div>
             <div class="form-group">
+                <label for="id_categoria">Categoría</label>
+                <select id="id_categoria" name="id_categoria" required>
+                    <?php foreach ($categorias as $categoria): ?>
+                        <option value="<?php echo htmlspecialchars($categoria['id_categoria']); ?>"
+                                <?php echo ($evento && $evento['id_categoria'] == $categoria['id_categoria']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($categoria['nombre_categoria']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="codigo_evento">Código de Evento</label>
+                <input type="text" id="codigo_evento" name="codigo_evento" value="<?php echo $evento ? htmlspecialchars($evento['codigo_evento']) : ''; ?>" required>
+            </div>
+            <div class="form-group">
                 <label for="descripcion">Descripción</label>
                 <textarea id="descripcion" name="descripcion" rows="4"><?php echo $evento ? htmlspecialchars($evento['descripcion']) : ''; ?></textarea>
             </div>
@@ -49,6 +64,10 @@
             <div class="form-group">
                 <label for="hora_fin">Hora de Fin</label>
                 <input type="time" id="hora_fin" name="hora_fin" value="<?php echo $evento ? htmlspecialchars($evento['hora_fin']) : ''; ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="ubicacion">Ubicación</label>
+                <input type="text" id="ubicacion" name="ubicacion" value="<?php echo $evento ? htmlspecialchars($evento['ubicacion']) : ''; ?>" required>
             </div>
             <div class="form-group">
                 <label for="cupo_maximo">Cupo Máximo</label>

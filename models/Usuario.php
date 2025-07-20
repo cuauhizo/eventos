@@ -95,4 +95,15 @@ class Usuario {
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([$rol, $id_usuario]);
     }
+
+    public function obtenerTodosConRol() {
+        $sql = "SELECT id_usuario, nombre, apellidos, correo, id_empleado, rol, fecha_registro FROM usuarios ORDER BY fecha_registro DESC";
+        try {
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al cargar la lista de usuarios: " . $e->getMessage());
+            return [];
+        }
+    }
 }

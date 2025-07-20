@@ -46,36 +46,40 @@
         ?>
 
         <table>
-            <thead>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th> <th>Código</th>
+            <th>Ubicación</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Cupo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (!empty($eventos)): ?>
+            <?php foreach ($eventos as $evento): ?>
                 <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Cupo</th>
-                    <th>Acciones</th>
+                    <td><?php echo htmlspecialchars($evento['id_evento']); ?></td>
+                    <td><?php echo htmlspecialchars($evento['nombre_evento']); ?></td>
+                    <td><?php echo htmlspecialchars($evento['nombre_categoria']); ?></td> <td><?php echo htmlspecialchars($evento['codigo_evento']); ?></td>
+                    <td><?php echo htmlspecialchars($evento['ubicacion']); ?></td>
+                    <td><?php echo htmlspecialchars($evento['fecha']); ?></td>
+                    <td><?php echo htmlspecialchars($evento['hora_inicio']) . ' - ' . htmlspecialchars($evento['hora_fin']); ?></td>
+                    <td><?php echo htmlspecialchars($evento['cupo_disponible']) . ' / ' . htmlspecialchars($evento['cupo_maximo']); ?></td>
+                    <td class="action-links">
+                        <a href="../public/index.php?action=admin_evento_form&id=<?php echo htmlspecialchars($evento['id_evento']); ?>">Editar</a>
+                        <a href="../public/index.php?action=admin_eliminar_evento&id=<?php echo htmlspecialchars($evento['id_evento']); ?>" onclick="return confirm('¿Estás seguro de que quieres eliminar este evento?');">Eliminar</a>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($eventos)): ?>
-                    <?php foreach ($eventos as $evento): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($evento['id_evento']); ?></td>
-                            <td><?php echo htmlspecialchars($evento['nombre_evento']); ?></td>
-                            <td><?php echo htmlspecialchars($evento['fecha']); ?></td>
-                            <td><?php echo htmlspecialchars($evento['hora_inicio']) . ' - ' . htmlspecialchars($evento['hora_fin']); ?></td>
-                            <td><?php echo htmlspecialchars($evento['cupo_disponible']) . ' / ' . htmlspecialchars($evento['cupo_maximo']); ?></td>
-                            <td class="action-links">
-                                <a href="../public/index.php?action=admin_evento_form&id=<?php echo htmlspecialchars($evento['id_evento']); ?>">Editar</a>
-                                <a href="../public/index.php?action=admin_eliminar_evento&id=<?php echo htmlspecialchars($evento['id_evento']); ?>" onclick="return confirm('¿Estás seguro de que quieres eliminar este evento?');">Eliminar</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="6" style="text-align: center;">No hay eventos para mostrar.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr><td colspan="9" style="text-align: center;">No hay eventos para mostrar.</td></tr>
+        <?php endif; ?>
+    </tbody>
+</table>
     </div>
 </body>
 </html>
