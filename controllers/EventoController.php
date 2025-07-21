@@ -160,4 +160,19 @@ class EventoController {
     public function eliminarReservasPendientes($id_usuario) {
         return $this->reservacionModel->eliminarReservasPendientes($id_usuario);
     }
+
+        // En tu controlador, antes de la línea require_once...
+    public function mostrarEventos() {
+        // Aquí se llama al modelo y se asigna el resultado a la variable
+        $eventos = $this->eventoModel->getEventosDisponibles();
+
+        // AGREGA ESTA LÍNEA TEMPORAL PARA VERIFICAR LA VARIABLE
+        // echo '<pre>';
+        // print_r($eventos);
+        // echo '</pre>';
+        // die(); // Esto detendrá la ejecución del script aquí
+
+        require_once ROOT_PATH . '/views/eventos.php';
+    }
+
 }

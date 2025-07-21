@@ -35,7 +35,7 @@
             </div>
             <div class="mb-3">
                 <label for="telefono" class="form-label">Número de WhatsApp:</label>
-                <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ej. 5512345678" required pattern="[0-9]+" title="Solo números.">
+                <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Ej. 5512345678" required pattern="[0-9]+" maxlength="10" title="Solo números.">
             </div>
             <div class="mb-3">
                 <label for="correo" class="form-label">Correo Electrónico:</label>

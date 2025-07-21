@@ -99,10 +99,18 @@ switch ($action) {
         break;
 
     // --- ACCIONES DE USUARIO ---
+    // case 'eventos':
+    //     // **CORRECCIÓN AQUÍ:** Ya no se obtiene una lista de categorías separada
+    //     $eventos_agrupados = $eventoController->getEventosDisponiblesPorCategoria();
+    //     require_once ROOT_PATH . '/views/eventos.php';
+    //     break;
+
     case 'eventos':
-        // **CORRECCIÓN AQUÍ:** Ya no se obtiene una lista de categorías separada
-        $eventos_agrupados = $eventoController->getEventosDisponiblesPorCategoria();
-        require_once ROOT_PATH . '/views/eventos.php';
+        // Esta es la línea que debe ejecutarse.
+        // El método mostrarEventos() se encarga de todo:
+        // 1. Obtener los eventos del modelo.
+        // 2. Incluir el archivo de la vista 'eventos.php'
+        $eventoController->mostrarEventos();
         break;
 
     case 'mis_reservas':
@@ -113,6 +121,12 @@ switch ($action) {
         $reservaciones = $eventoController->getReservacionesDeUsuario($_SESSION['id_usuario']);
         require_once ROOT_PATH . '/views/mis_reservas.php';
         break;
+
+    // case 'mostrar_eventos':
+    //     $eventoController = new EventoController($pdo);
+    //     $eventos = $eventoController->getEventosDisponibles(); // Aquí se define la variable
+    //     require_once ROOT_PATH . '/views/eventos.php';
+    //     break;
 
     case 'reservar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

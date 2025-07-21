@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-s cale=1.0">
     <title>Selección de Eventos - Sistema de Reservas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -47,7 +47,7 @@
             <?php if (isset($_SESSION['loggedin'])): ?>
                 <p class="mb-0">Bienvenido, <strong><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></strong>!</p>
                 <div>
-                    <!-- <a href="../public/index.php?action=mis_reservas" class="btn btn-sm btn-outline-primary me-2">Mis Reservas</a> -->
+                    <a href="../public/index.php?action=mis_reservas" class="btn btn-sm btn-outline-primary me-2">Mis Reservas</a>
                     <a href="../public/index.php?action=logout" class="btn btn-sm btn-danger">Cerrar Sesión</a>
                 </div>
             <?php else: ?>
@@ -59,7 +59,6 @@
         <p class="text-center text-muted">Selecciona los eventos a los que te gustaría asistir (máximo 4).</p>
 
         <?php
-        // session_start();
         if (isset($_SESSION['reserva_mensaje'])):
             $alert_class = ($_SESSION['reserva_exito']) ? 'alert-success' : 'alert-danger';
             echo '<div class="alert ' . $alert_class . ' text-center">' . $_SESSION['reserva_mensaje'] . '</div>';
@@ -71,52 +70,74 @@
         unset($_SESSION['eventos_preseleccionados']);
         
         $hay_cupo_disponible = false;
-        if (!empty($eventos_agrupados)) {
-            foreach ($eventos_agrupados as $eventos_en_categoria) {
-                foreach ($eventos_en_categoria as $evento) {
-                    if ($evento['cupo_disponible'] > 0) {
-                        $hay_cupo_disponible = true;
-                        break 2; // Salir de ambos bucles
-                    }
+        if (!empty($eventos)) {
+            foreach ($eventos as $evento) {
+                if ($evento['cupo_disponible'] > 0) {
+                    $hay_cupo_disponible = true;
+                    break;
+                }
+            }
+        }
+
+        // Definir los horarios y sus títulos
+        $horarios = [
+            '11:45:00-12:30:00' => 'Bloque 1 (11:45 - 12:30)',
+            '12:30:00-13:15:00' => 'Bloque 2 (12:30 - 13:15)',
+            '13:15:00-14:00:00' => 'Bloque 3 (13:15 - 14:00)',
+            '14:00:00-14:45:00' => 'Bloque 4 (14:00 - 14:45)',
+        ];
+
+        // Agrupar los eventos por horario
+        $eventos_agrupados_por_horario = [];
+        foreach ($eventos as $evento) {
+            $hora_inicio_evento = $evento['hora_inicio'];
+            
+            foreach ($horarios as $rango_horas => $titulo) {
+                list($hora_inicio_rango, $hora_fin_rango) = explode('-', $rango_horas);
+                
+                if ($hora_inicio_evento >= $hora_inicio_rango && $hora_inicio_evento < $hora_fin_rango) {
+                    $eventos_agrupados_por_horario[$titulo][] = $evento;
+                    break;
                 }
             }
         }
         ?>
 
         <form action="../public/index.php?action=reservar" method="POST">
-            <?php if (!empty($eventos_agrupados)): ?>
-                <div class="row">
-                    <h2 class="mt-5 mb-3 text-center text-secondary">Indispensables</h2>
+            <div class="row">
+                <h2 class="mt-5 mb-3 text-center text-secondary">Indispensables</h2>
+                <div class="col-md-12">
+                    <p class="text-center text-muted mb-4">
+                        <strong>Nota:</strong> Les pedimos su total atención y cooperación para estas actividades, ya que su participación es fundamental para el éxito colectivo de nuestro evento. ¡Estamos ansiosos por verlos en acción y celebrar juntos el espíritu deportivo!
+                    </p>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 evento-item selected indispensables">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Bienvenida Doug Bowles</h5>
+                            <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Gimnasio</small></p>
+                            <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 10:15:00 - 10:50:00</small></p>
+                            <p class="card-text">lorem ipsum</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 evento-item selected indispensables">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Team Building in Motion</h5>
+                            <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Cancha Fut A</small></p>
+                            <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 11:00:00 - 11:45:00</small></p>
+                            <p class="card-text">lorem ipsum</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php if (!empty($eventos_agrupados_por_horario) || !empty($eventos_preseleccionados)): ?>
 
-                    <div class="col-md-6 mb-4">
-                                <div class="card h-100 evento-item selected indispensables">
-                                    <div class="card-body">
-                                        <input type="checkbox" name="eventos_seleccionados[]" value="8" id="evento-obl1" disabled="">
-                                        <h5 class="card-title text-primary">Bienvenida Doug Bowles</h5>
-                                        <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Gimnasio</small></p>
-                                        <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 10:15:00 - 10:50:00</small></p>
-                                        <p class="card-text">lorem ipsum</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="card h-100 evento-item selected indispensables">
-                                    <div class="card-body">
-                                        <input type="checkbox" name="eventos_seleccionados[]" value="8" id="evento-obl2" disabled="">
-                                        <h5 class="card-title text-primary">Team Building in Motion</h5>
-                                        <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Cancha Fut A</small></p>
-                                        <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 11:00:00 - 11:45:00</small></p>
-                                        <p class="card-text">lorem ipsum</p>
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-
-                    <?php foreach ($eventos_agrupados as $categoria_nombre => $eventos_en_categoria): ?>
-                        <h2 class="mt-5 mb-3 text-center text-secondary"><?php echo htmlspecialchars($categoria_nombre); ?></h2>
-                        <?php foreach ($eventos_en_categoria as $evento): 
+                <?php foreach ($eventos_agrupados_por_horario as $horario_titulo => $eventos_en_horario): ?>
+                    <h2 class="mt-5 mb-3 text-center text-secondary"><?php echo htmlspecialchars($horario_titulo); ?></h2>
+                    <div class="row">
+                        <?php foreach ($eventos_en_horario as $evento): 
                             $is_selected = in_array($evento['id_evento'], $eventos_preseleccionados);
                             $is_disabled = ($evento['cupo_disponible'] <= 0);
                             $selected_class = $is_selected ? 'selected' : '';
@@ -125,7 +146,9 @@
                             $disabled_attr = $is_disabled ? 'disabled' : '';
                         ?>
                             <div class="col-md-3 mb-4">
-                                <div class="card h-100 evento-item <?php echo $selected_class . ' ' . $disabled_class; ?>" onclick="toggleSelection(this, 'evento-<?php echo htmlspecialchars($evento['id_evento']); ?>')">
+                                <div class="card h-100 evento-item <?php echo $selected_class . ' ' . $disabled_class; ?>" 
+                                    onclick="toggleSelection(this, 'evento-<?php echo htmlspecialchars($evento['id_evento']); ?>')"
+                                    data-block="<?php echo htmlspecialchars($horario_titulo); ?>">
                                     <div class="card-body">
                                         <input type="checkbox" name="eventos_seleccionados[]" value="<?php echo htmlspecialchars($evento['id_evento']); ?>" id="evento-<?php echo htmlspecialchars($evento['id_evento']); ?>" <?php echo $checked_attr . ' ' . $disabled_attr; ?>>
                                         <h5 class="card-title text-primary"><?php echo htmlspecialchars($evento['nombre_evento']); ?></h5>
@@ -144,8 +167,8 @@
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php endforeach; ?>
-                </div>
+                    </div>
+                <?php endforeach; ?>
             <?php else: ?>
                 <div class="alert alert-info text-center">No hay eventos para mostrar en este momento.</div>
             <?php endif; ?>
@@ -160,41 +183,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Función para manejar la lógica de exclusión mutua de los eventos de fútbol
+        function handleFutbolConflict(checkboxId, isChecked) {
+            const ID_FASE1 = 'evento-18';
+            const ID_FASE2 = 'evento-24';
 
-         function toggleSelection(element, checkboxId) {
-        // No permitir la selección si el elemento está deshabilitado
-        if (element.classList.contains('disabled')) {
-            return;
-        }
-        
-        const checkbox = document.getElementById(checkboxId);
-        
-        // Cambiar estado del checkbox
-        checkbox.checked = !checkbox.checked;
+            // Si el checkbox no es de los eventos de fútbol, no hacer nada
+            if (checkboxId !== ID_FASE1 && checkboxId !== ID_FASE2) {
+                return;
+            }
 
-        // Aplicar clases visuales
-        if (checkbox.checked) {
-            element.classList.add('selected');
-        } else {
-            element.classList.remove('selected');
-        }
-
-        // =============================================
-        // Lógica para manejar fases excluyentes de fútbol
-        // =============================================
-        const ID_FASE1 = 'evento-18';
-        const ID_FASE2 = 'evento-24';
-        
-        // Solo aplicamos esta lógica si es uno de los eventos de fútbol
-        if (checkboxId === ID_FASE1 || checkboxId === ID_FASE2) {
-            const otraFaseId = checkboxId === ID_FASE1 ? ID_FASE2 : ID_FASE1;
+            const otraFaseId = (checkboxId === ID_FASE1) ? ID_FASE2 : ID_FASE1;
             const otraFaseCheckbox = document.getElementById(otraFaseId);
-            
+
             if (otraFaseCheckbox) {
                 const otraFaseCard = otraFaseCheckbox.closest('.evento-item');
                 
-                if (checkbox.checked) {
-                    // Deshabilitar la otra fase
+                if (isChecked) {
+                    // Si se selecciona uno, deshabilitar y deseleccionar el otro
                     otraFaseCheckbox.disabled = true;
                     otraFaseCheckbox.checked = false;
                     if (otraFaseCard) {
@@ -202,7 +208,7 @@
                         otraFaseCard.classList.remove('selected');
                     }
                 } else {
-                    // Habilitar la otra fase
+                    // Si se deselecciona uno, habilitar el otro
                     otraFaseCheckbox.disabled = false;
                     if (otraFaseCard) {
                         otraFaseCard.classList.remove('disabled');
@@ -210,29 +216,71 @@
                 }
             }
         }
-    }
 
-    // Inicialización para manejar estado inicial
-    document.addEventListener('DOMContentLoaded', function() {
-        const ID_FASE1 = 'evento-18';
-        const ID_FASE2 = 'evento-24';
-        
-        const fase1 = document.getElementById(ID_FASE1);
-        const fase2 = document.getElementById(ID_FASE2);
-        
-        // Si algún checkbox viene preseleccionado, deshabilitar el otro
-        if (fase1 && fase1.checked) {
-            const fase2Card = fase2?.closest('.evento-item');
-            if (fase2) fase2.disabled = true;
-            if (fase2Card) fase2Card.classList.add('disabled');
-        }
+        function toggleSelection(element, checkboxId) {
+            // No permitir la selección si el elemento está deshabilitado
+            if (element.classList.contains('disabled')) {
+                return;
+            }
+            
+            const checkbox = document.getElementById(checkboxId);
+            const isAboutToBeChecked = !checkbox.checked;
 
-        if (fase2 && fase2.checked) {
-            const fase1Card = fase1?.closest('.evento-item');
-            if (fase1) fase1.disabled = true;
-            if (fase1Card) fase1Card.classList.add('disabled');
+            if (isAboutToBeChecked) {
+                // 1. Validar por bloque de tiempo
+                const blockTitle = element.getAttribute('data-block');
+                const selectedInBlock = document.querySelectorAll(`[data-block="${blockTitle}"] input[type="checkbox"]:checked`);
+                
+                if (selectedInBlock.length > 0) {
+                    alert("Solo puedes seleccionar un evento por cada bloque de tiempo.");
+                    return; // Detener la ejecución
+                }
+                
+                // 2. Validar por cantidad máxima de eventos opcionales
+                // El selector busca checkboxes de eventos opcionales
+                const selectedCheckboxes = document.querySelectorAll('.evento-item:not(.indispensables) input[type="checkbox"]:checked');
+                const MAX_EVENTOS_OPCIONALES = 4;
+                
+                if (selectedCheckboxes.length >= MAX_EVENTOS_OPCIONALES) {
+                    alert("Solo puedes seleccionar un máximo de " + MAX_EVENTOS_OPCIONALES + " eventos opcionales.");
+                    return; // Detener la ejecución
+                }
+            }
+            
+            // Si las validaciones pasan, actualizar el estado
+            checkbox.checked = isAboutToBeChecked;
+
+            // Aplicar/quitar clases visuales
+            if (checkbox.checked) {
+                element.classList.add('selected');
+            } else {
+                element.classList.remove('selected');
+            }
+
+            // Llamar a la lógica específica para los eventos de fútbol
+            handleFutbolConflict(checkboxId, checkbox.checked);
         }
-    });
+        
+        // Función para inicializar el estado de los eventos de fútbol al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const ID_FASE1 = 'evento-18';
+            const ID_FASE2 = 'evento-24';
+            
+            const fase1 = document.getElementById(ID_FASE1);
+            const fase2 = document.getElementById(ID_FASE2);
+            
+            if (fase1 && fase2) {
+                if (fase1.checked) {
+                    const fase2Card = fase2.closest('.evento-item');
+                    fase2.disabled = true;
+                    if (fase2Card) fase2Card.classList.add('disabled');
+                } else if (fase2.checked) {
+                    const fase1Card = fase1.closest('.evento-item');
+                    fase1.disabled = true;
+                    if (fase1Card) fase1Card.classList.add('disabled');
+                }
+            }
+        });
     </script>
 </body>
 </html>
