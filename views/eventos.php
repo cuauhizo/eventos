@@ -35,6 +35,10 @@
             border-color: #dc3545;
         }
         .evento-item input[type="checkbox"] { display: none; }
+
+        .indispensables {
+            cursor: default;
+        }
     </style>
 </head>
 <body>
@@ -43,7 +47,7 @@
             <?php if (isset($_SESSION['loggedin'])): ?>
                 <p class="mb-0">Bienvenido, <strong><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></strong>!</p>
                 <div>
-                    <a href="../public/index.php?action=mis_reservas" class="btn btn-sm btn-outline-primary me-2">Mis Reservas</a>
+                    <!-- <a href="../public/index.php?action=mis_reservas" class="btn btn-sm btn-outline-primary me-2">Mis Reservas</a> -->
                     <a href="../public/index.php?action=logout" class="btn btn-sm btn-danger">Cerrar Sesión</a>
                 </div>
             <?php else: ?>
@@ -52,7 +56,7 @@
         </div>
         
         <h1 class="text-center mb-4">Eventos Deportivos</h1>
-        <p class="text-center text-muted">Selecciona los eventos a los que te gustaría asistir (máximo 3).</p>
+        <p class="text-center text-muted">Selecciona los eventos a los que te gustaría asistir (máximo 4).</p>
 
         <?php
         // session_start();
@@ -82,6 +86,34 @@
         <form action="../public/index.php?action=reservar" method="POST">
             <?php if (!empty($eventos_agrupados)): ?>
                 <div class="row">
+                    <h2 class="mt-5 mb-3 text-center text-secondary">Indispensables</h2>
+
+                    <div class="col-md-6 mb-4">
+                                <div class="card h-100 evento-item selected indispensables">
+                                    <div class="card-body">
+                                        <input type="checkbox" name="eventos_seleccionados[]" value="8" id="evento-obl1" disabled="">
+                                        <h5 class="card-title text-primary">Bienvenida Doug Bowles</h5>
+                                        <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Gimnasio</small></p>
+                                        <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 10:15:00 - 10:50:00</small></p>
+                                        <p class="card-text">lorem ipsum</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 evento-item selected indispensables">
+                                    <div class="card-body">
+                                        <input type="checkbox" name="eventos_seleccionados[]" value="8" id="evento-obl2" disabled="">
+                                        <h5 class="card-title text-primary">Team Building in Motion</h5>
+                                        <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Cancha Fut A</small></p>
+                                        <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 11:00:00 - 11:45:00</small></p>
+                                        <p class="card-text">lorem ipsum</p>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
                     <?php foreach ($eventos_agrupados as $categoria_nombre => $eventos_en_categoria): ?>
                         <h2 class="mt-5 mb-3 text-center text-secondary"><?php echo htmlspecialchars($categoria_nombre); ?></h2>
                         <?php foreach ($eventos_en_categoria as $evento): 
@@ -128,22 +160,79 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function toggleSelection(element, checkboxId) {
-            // No permitir la selección si el elemento está deshabilitado
-            if (element.classList.contains('disabled')) {
-                return;
-            }
-            
-            const checkbox = document.getElementById(checkboxId);
-            
-            checkbox.checked = !checkbox.checked;
 
-            if (checkbox.checked) {
-                element.classList.add('selected');
-            } else {
-                element.classList.remove('selected');
+         function toggleSelection(element, checkboxId) {
+        // No permitir la selección si el elemento está deshabilitado
+        if (element.classList.contains('disabled')) {
+            return;
+        }
+        
+        const checkbox = document.getElementById(checkboxId);
+        
+        // Cambiar estado del checkbox
+        checkbox.checked = !checkbox.checked;
+
+        // Aplicar clases visuales
+        if (checkbox.checked) {
+            element.classList.add('selected');
+        } else {
+            element.classList.remove('selected');
+        }
+
+        // =============================================
+        // Lógica para manejar fases excluyentes de fútbol
+        // =============================================
+        const ID_FASE1 = 'evento-18';
+        const ID_FASE2 = 'evento-24';
+        
+        // Solo aplicamos esta lógica si es uno de los eventos de fútbol
+        if (checkboxId === ID_FASE1 || checkboxId === ID_FASE2) {
+            const otraFaseId = checkboxId === ID_FASE1 ? ID_FASE2 : ID_FASE1;
+            const otraFaseCheckbox = document.getElementById(otraFaseId);
+            
+            if (otraFaseCheckbox) {
+                const otraFaseCard = otraFaseCheckbox.closest('.evento-item');
+                
+                if (checkbox.checked) {
+                    // Deshabilitar la otra fase
+                    otraFaseCheckbox.disabled = true;
+                    otraFaseCheckbox.checked = false;
+                    if (otraFaseCard) {
+                        otraFaseCard.classList.add('disabled');
+                        otraFaseCard.classList.remove('selected');
+                    }
+                } else {
+                    // Habilitar la otra fase
+                    otraFaseCheckbox.disabled = false;
+                    if (otraFaseCard) {
+                        otraFaseCard.classList.remove('disabled');
+                    }
+                }
             }
         }
+    }
+
+    // Inicialización para manejar estado inicial
+    document.addEventListener('DOMContentLoaded', function() {
+        const ID_FASE1 = 'evento-18';
+        const ID_FASE2 = 'evento-24';
+        
+        const fase1 = document.getElementById(ID_FASE1);
+        const fase2 = document.getElementById(ID_FASE2);
+        
+        // Si algún checkbox viene preseleccionado, deshabilitar el otro
+        if (fase1 && fase1.checked) {
+            const fase2Card = fase2?.closest('.evento-item');
+            if (fase2) fase2.disabled = true;
+            if (fase2Card) fase2Card.classList.add('disabled');
+        }
+
+        if (fase2 && fase2.checked) {
+            const fase1Card = fase1?.closest('.evento-item');
+            if (fase1) fase1.disabled = true;
+            if (fase1Card) fase1Card.classList.add('disabled');
+        }
+    });
     </script>
 </body>
 </html>

@@ -30,9 +30,43 @@ class EventoController {
 
     public function procesarReservacion($id_usuario, $eventos_seleccionados) {
         $num_seleccionados = count($eventos_seleccionados);
-        if ($num_seleccionados < 1 || $num_seleccionados > 3) {
-            return "Debes seleccionar entre 1 y 3 eventos.";
+        if ($num_seleccionados < 1 || $num_seleccionados > 4) {
+            return "Debes seleccionar entre 1 y 4 eventos.";
         }
+
+        if (in_array(18, $eventos_seleccionados) && in_array(24, $eventos_seleccionados)) {
+            return "No puedes reservar el 'Fútbol Torneo Fase 1' y 'Fútbol Torneo Fase 2' al mismo tiempo.";
+        }
+
+        // --- NUEVA LÓGICA DE VALIDACIÓN DE HORARIO EN EL SERVIDOR ---
+            $eventos_data = [];
+            foreach ($eventos_seleccionados as $id) {
+                $evento = $this->eventoModel->obtenerPorId($id);
+                if ($evento) {
+                    $eventos_data[] = $evento;
+                }
+            }
+
+            // Ordenar los eventos por fecha y hora de inicio para la validación
+            usort($eventos_data, function($a, $b) {
+                $datetime_a = strtotime($a['fecha'] . ' ' . $a['hora_inicio']);
+                $datetime_b = strtotime($b['fecha'] . ' ' . $b['hora_inicio']);
+                return $datetime_a - $datetime_b;
+            });
+
+            for ($i = 0; $i < count($eventos_data) - 1; $i++) {
+                $current_event = $eventos_data[$i];
+                $next_event = $eventos_data[$i + 1];
+
+                $end_time_current = strtotime($current_event['fecha'] . ' ' . $current_event['hora_fin']);
+                $start_time_next = strtotime($next_event['fecha'] . ' ' . $next_event['hora_inicio']);
+
+                if ($start_time_next < $end_time_current) {
+                    return "El evento '" . $next_event['nombre_evento'] . "' se empalma con el evento '" . $current_event['nombre_evento'] . "'.";
+                }
+            }
+            
+            // --- FIN DE LA NUEVA LÓGICA ---
 
         $this->pdo->beginTransaction();
         try {
