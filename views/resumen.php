@@ -37,6 +37,16 @@
         ?>
 
         <?php if (!empty($reservaciones)): ?>
+                <div class="resumen-item">
+                    <h3>Bienvenida Doug Bowles</h3>
+                    <p><strong>Fecha:</strong> 2025-07-28</p>
+                    <p><strong>Hora:</strong> 10:15:00</p>
+                </div>
+                <div class="resumen-item">
+                    <h3>Team Building in Motion</h3>
+                    <p><strong>Fecha:</strong> 2025-07-28</p>
+                    <p><strong>Hora:</strong> 11:00:00</p>
+                </div>
             <?php foreach ($reservaciones as $reserva): ?>
                 <div class="resumen-item">
                     <h3><?php echo htmlspecialchars($reserva['nombre_evento']); ?></h3>

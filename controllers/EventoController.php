@@ -2,6 +2,7 @@
 // Incluye las clases del QR Code
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use Dompdf\Dompdf; // Asumimos el uso de Dompdf
 
 // Incluye los modelos que va a usar el controlador
 require_once ROOT_PATH . '/models/Evento.php';
@@ -98,22 +99,10 @@ class EventoController {
 
     public function finalizarReservacion($id_grupo) {
         try {
-            $qr_content = "GRUPO_RESERVACION_ID:" . $id_grupo;
-            $qr_file_name = "grupo_reserva_" . $id_grupo . ".png";
-            $qr_path = ROOT_PATH . "/public/qrcodes/" . $qr_file_name;
+            // === LÓGICA PARA GENERAR PDF Y ENVIAR CORREO ===
             
-            $options = new QROptions([
-                'outputType' => QRCode::OUTPUT_IMAGE_PNG,
-                'eccLevel' => QRCode::ECC_L,
-                'imageTransparent' => false,
-                'scale' => 8
-            ]);
-            (new QRCode($options))->render($qr_content, $qr_path);
-
-            $qr_db_path = "/eventoNike.com/public/qrcodes/" . $qr_file_name;
-            $this->reservacionModel->finalizarReservacion($id_grupo, $qr_db_path);
-            
-            $sql_reservas = "SELECT r.*, e.nombre_evento, e.fecha, e.hora_inicio, u.nombre, u.correo
+            // 1. Obtener los datos de las reservaciones y el usuario
+            $sql_reservas = "SELECT r.*, e.nombre_evento, e.fecha, e.hora_inicio, e.hora_fin, e.ubicacion, u.nombre, u.correo
                              FROM reservaciones r
                              JOIN eventos e ON r.id_evento = e.id_evento
                              JOIN usuarios u ON r.id_usuario = u.id_usuario
@@ -126,16 +115,79 @@ class EventoController {
                 return "Error: No se encontraron reservas para este grupo.";
             }
             
+            // Construir el cuerpo del correo en formato HTML
+            $cuerpo_html = '
+                <h2>¡Hola ' . htmlspecialchars($reservaciones[0]['nombre']) . '!</h2>
+                <p>Tu reservación ha sido confirmada. Adjunto encontrarás tus boletos de acceso en formato PDF.</p>
+                <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 20px;">
+                    <h3>Detalles de tu Reserva</h3>
+            ';
+
+            $cuerpo_html .='
+                <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+                    <p><strong>Evento:</strong> Bienvenida Doug Bowles</p>
+                    <p><strong>Ubicación:</strong> Gimnasio</p>
+                    <p><strong>Fecha:</strong> 2025-07-28</p>
+                    <p><strong>Hora:</strong> 10:15:00 - 10:50:00</p>
+                </div>
+                <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+                    <p><strong>Evento:</strong> Team Building in Motion</p>
+                    <p><strong>Ubicación:</strong> Cancha Fut A</p>
+                    <p><strong>Fecha:</strong> 2025-07-28</p>
+                    <p><strong>Hora:</strong> 11:00:00 - 11:45:00</p>
+                </div>
+            ';
+
+            foreach ($reservaciones as $reserva) {
+                $cuerpo_html .= '
+                    <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+                        <p><strong>Evento:</strong> ' . htmlspecialchars($reserva['nombre_evento']) . '</p>
+                        <p><strong>Ubicación:</strong> ' . htmlspecialchars($reserva['ubicacion']) . '</p>
+                        <p><strong>Fecha:</strong> ' . htmlspecialchars($reserva['fecha']) . '</p>
+                        <p><strong>Hora:</strong> ' . htmlspecialchars($reserva['hora_inicio']) . ' - ' . htmlspecialchars($reserva['hora_fin']) . '</p>
+                    </div>
+                ';
+            }
+            $cuerpo_html .= '</div><p>¡Esperamos verte pronto!</p>';
+
+
+            // 2. Generar el contenido del PDF (con la vista que creaste)
+            ob_start();
+            include ROOT_PATH . '/views/templates/reservacion_pdf.php'; // Usa la vista del PDF que ya creaste
+            $html_pdf = ob_get_clean();
+
+            // 3. Generar el PDF y guardarlo temporalmente
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html_pdf);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $pdf_output = $dompdf->output();
+
+            $pdf_path = ROOT_PATH . "/temp/reservacion_" . $id_grupo . ".pdf";
+            file_put_contents($pdf_path, $pdf_output);
+
+            // 4. Enviar el correo con el PDF adjunto (con el nombre de método corregido)
             $mailHelper = new MailHelper();
-            $mailHelper->enviarConfirmacionReserva(
+            $envio_exitoso = $mailHelper->enviarCorreoConAdjunto(
                 $reservaciones[0]['correo'],
                 $reservaciones[0]['nombre'],
-                $reservaciones,
-                $qr_db_path
+                'Confirmación de Reservación de Eventos Nike', // Asunto
+                $cuerpo_html,
+                $pdf_path,
+                'boleto_de_acceso.pdf' // Nombre del archivo adjunto
             );
 
-            return true;
+            // 5. Eliminar el archivo PDF temporal
+            unlink($pdf_path);
+
+            if ($envio_exitoso) {
+                return true;
+            } else {
+                return "Error al enviar el correo de confirmación.";
+            }
+            
         } catch (Exception $e) {
+            error_log("Error en la confirmación final: " . $e->getMessage());
             return "Error en la confirmación final: " . $e->getMessage();
         }
     }

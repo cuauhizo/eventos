@@ -139,7 +139,7 @@ switch ($action) {
             
             if (is_numeric($resultado)) {
                 $_SESSION['reserva_exito'] = true;
-                $_SESSION['reserva_mensaje'] = "Tu reservación ha sido pre-confirmada. Por favor, confirma a continuación para finalizar y recibir tu QR.";
+                $_SESSION['reserva_mensaje'] = "Tu reservación ha sido pre-confirmada. Por favor, confirma a continuación para finalizar.";
                 $_SESSION['id_grupo'] = (int) $resultado;
                 header("Location: " . $_SERVER['PHP_SELF'] . "?action=resumen_reservas");
                 exit();
@@ -167,7 +167,7 @@ switch ($action) {
         require_once ROOT_PATH . '/views/resumen.php';
         break;
 
-    case 'finalizar_reserva':
+    case 'finalizar_reserva_old':
         if (!isset($_SESSION['id_grupo'])) {
             header("Location: " . $_SERVER['PHP_SELF'] . "?action=eventos");
             exit();
@@ -179,6 +179,28 @@ switch ($action) {
             unset($_SESSION['id_grupo']);
             $_SESSION['reserva_exito'] = true;
             $_SESSION['reserva_mensaje'] = "¡Reservación finalizada y correo de confirmación enviado!";
+            header("Location: " . $_SERVER['PHP_SELF'] . "?action=mis_reservas");
+            exit();
+        } else {
+            $_SESSION['reserva_exito'] = false;
+            $_SESSION['reserva_mensaje'] = $resultado;
+            header("Location: " . $_SERVER['PHP_SELF'] . "?action=resumen_reservas");
+            exit();
+        }
+        break;
+
+    case 'finalizar_reserva':
+        if (!isset($_SESSION['id_grupo'])) {
+            header("Location: " . $_SERVER['PHP_SELF'] . "?action=eventos");
+            exit();
+        }
+        $id_grupo = $_SESSION['id_grupo'];
+        $resultado = $eventoController->finalizarReservacion($id_grupo);
+        
+        if ($resultado === true) {
+            unset($_SESSION['id_grupo']);
+            $_SESSION['reserva_exito'] = true;
+            $_SESSION['reserva_mensaje'] = "¡Reservación finalizada y correo de confirmación con PDF enviado!";
             header("Location: " . $_SERVER['PHP_SELF'] . "?action=mis_reservas");
             exit();
         } else {
