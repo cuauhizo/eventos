@@ -45,10 +45,6 @@
                 <label for="id_empleado" class="form-label">ID de Empleado:</label>
                 <input type="text" class="form-control" id="id_empleado" name="id_empleado" required pattern="[A-Za-z0-9]+" title="Solo letras y números.">
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Contraseña:</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="acepta_contacto" name="acepta_contacto" value="1" required>
                 <label class="form-check-label" for="acepta_contacto">Acepto que se me contacte por este medio para recibir noticias del evento.</label>

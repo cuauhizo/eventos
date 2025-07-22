@@ -59,7 +59,7 @@
         <?php endif; ?>
 
         <div class="resumen-actions">
-            <a href="../public/index.php?action=eventos" class="btn btn-secondary me-2">Modificar Selección</a>
+            <!-- <a href="../public/index.php?action=eventos" class="btn btn-secondary me-2">Modificar Selección</a> -->
             <a href="../public/index.php?action=finalizar_reserva" class="btn btn-success">Confirmar y Finalizar</a>
         </div>
     </div>

@@ -94,7 +94,7 @@ switch ($action) {
 
     case 'logout':
         session_destroy();
-        header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
+        header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_register_form");
         exit();
         break;
 

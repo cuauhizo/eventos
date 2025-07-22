@@ -7,34 +7,28 @@ require_once ROOT_PATH . '/models/Usuario.php';
 
 class AuthController {
     // La propiedad 'usuarioModel' contendrá una instancia de la clase Usuario.
-    // Esto es un ejemplo de Inyección de Dependencias.
     private $usuarioModel;
 
     public function __construct($pdo) {
-        // Al crear el controlador, se le pasa la conexión a la base de datos ($pdo),
-        // y se usa para inicializar el modelo de usuario.
         $this->usuarioModel = new Usuario($pdo);
     }
 
     /**
-     * Registra a un nuevo usuario en el sistema.
+     * Registra a un nuevo usuario en el sistema, sin requerir contraseña.
      * @param string $nombre, $apellidos, etc. Los datos del usuario.
      * @param int $acepta_contacto 1 si acepta, 0 si no.
      * @return bool|string Retorna true si el registro fue exitoso, o un mensaje de error si falló.
      */
-    public function registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto) {
+    // MODIFICADO: El método registrarUsuario ya no recibe $password en sus parámetros
+    public function registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $acepta_contacto) { 
         // --- Validaciones del lado del servidor (cruciales para la seguridad) ---
         // 1. Verificación de que los campos obligatorios no estén vacíos.
-        if (empty($nombre) || empty($apellidos) || empty($telefono) || empty($correo) || empty($id_empleado) || empty($password)) {
+        // Se ha eliminado la verificación de 'password' aquí.
+        if (empty($nombre) || empty($apellidos) || empty($telefono) || empty($correo) || empty($id_empleado)) {
             return "Todos los campos son obligatorios.";
         }
         
         // 2. Validaciones de formato con expresiones regulares.
-        // ^[\p{L}\s]+$ :
-        // ^    -> Inicia la cadena.
-        // [\p{L}\s]+ -> Acepta una o más letras de cualquier idioma (\p{L}) o espacios (\s).
-        // $    -> Termina la cadena.
-        // /u   -> Modificador que permite el soporte para caracteres Unicode (como acentos, ñ, etc.).
         if (!preg_match("/^[\p{L}\s]+$/u", $nombre)) {
             return "El nombre solo puede contener letras y espacios.";
         }
@@ -54,22 +48,31 @@ class AuthController {
         }
 
         // 4. Validación de la regla de negocio (dominios permitidos).
-        if (substr($correo, -9) !== '@nike.com') {
-            return "Solo se aceptan correos electrónicos con el dominio @nike.com.";
+        // if (substr($correo, -9) !== '@nike.com') {
+        //     return "Solo se aceptan correos electrónicos con el dominio @nike.com.";
+        // }
+        if (substr($correo, -9) !== '@tolkogroup.com') {
+            return "Solo se aceptan correos electrónicos con el dominio @tolkogroup.com.";
         }
 
         // 5. Verificación de unicidad del correo electrónico.
-        if ($this->usuarioModel->existeUsuario($correo)) {
+        // CORRECCIÓN APLICADA: Se usa el método existeUsuario() que está definido en tu modelo.
+        if ($this->usuarioModel->existeUsuario($correo)) { 
             return "El correo electrónico ya está registrado.";
         }
+        // Asumiendo que buscarPorIdEmpleado existe en tu modelo Usuario
+        if ($this->usuarioModel->buscarPorIdEmpleado($id_empleado)) {
+            return "El ID de empleado ya está registrado.";
+        }
 
-        // 6. Cifrado de la contraseña.
-        // password_hash() usa un algoritmo de hashing seguro para que la contraseña
-        // nunca se guarde en texto plano, protegiendo a los usuarios.
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        // CAMBIO CRÍTICO: Eliminado el cifrado de la contraseña.
+        // Se pasa un valor nulo o vacío, o se ajusta el modelo para no esperar la contraseña.
+        $password_placeholder = null; // Si la columna 'password' en tu DB es NULLABLE.
+                                     // Si no es NULLABLE, usa '' (cadena vacía) y asegúrate que tu DB lo acepte.
 
-        // 7. Llamada al modelo para ejecutar la inserción en la base de datos.
-        $exito = $this->usuarioModel->crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $hashed_password, $acepta_contacto);
+        // 6. Llamada al modelo para ejecutar la inserción en la base de datos.
+        // MODIFICADO: La llamada a crearUsuario ya no pasa $password directamente
+        $exito = $this->usuarioModel->crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password_placeholder, $acepta_contacto);
 
         if ($exito) {
             return true;
@@ -79,26 +82,38 @@ class AuthController {
     }
 
     /**
-     * Inicia sesión de un usuario.
+     * Inicia sesión de un usuario solo con su correo electrónico.
      * @param string $correo El correo del usuario.
-     * @param string $password La contraseña en texto plano.
      * @return bool|string Retorna true si el inicio de sesión es exitoso, o un mensaje de error.
      */
-    public function iniciarSesion($correo, $password) {
+    // MODIFICADO: El método iniciarSesion ya no recibe $password en sus parámetros
+    public function iniciarSesion($correo) { 
+        if (empty($correo)) {
+            return "El correo electrónico es obligatorio.";
+        }
+
         // 1. Obtener los datos del usuario por su correo.
         $usuario = $this->usuarioModel->obtenerUsuarioPorCorreo($correo);
 
-        // 2. Verificar si el usuario existe y si la contraseña es correcta.
-        // password_verify() compara la contraseña en texto plano con el hash guardado.
-        if ($usuario && password_verify($password, $usuario['password'])) {
-            // 3. Si es correcto, se inicia la sesión y se guardan los datos clave.
+        // CAMBIO CRÍTICO: SOLO SE VERIFICA SI EL USUARIO EXISTE POR CORREO
+        if ($usuario) {
+            // 2. Si el usuario existe, se inicia la sesión y se guardan los datos clave.
             $_SESSION['loggedin'] = true;
             $_SESSION['id_usuario'] = $usuario['id_usuario'];
             $_SESSION['nombre'] = $usuario['nombre'];
             $_SESSION['rol'] = $usuario['rol'];
             return true;
         } else {
-            return "Correo o contraseña incorrectos.";
+            // Si el correo no está registrado
+            return "Correo electrónico no registrado.";
         }
+    }
+
+    /**
+     * Cierra la sesión del usuario.
+     */
+    public function logout() {
+        session_destroy();
+        // La redirección después del logout se maneja en el enrutador (index.php)
     }
 }

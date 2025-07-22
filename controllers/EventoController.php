@@ -119,8 +119,8 @@ class EventoController {
             $cuerpo_html = '
                 <h2>¡Hola ' . htmlspecialchars($reservaciones[0]['nombre']) . '!</h2>
                 <p>Tu reservación ha sido confirmada. Adjunto encontrarás tus boletos de acceso en formato PDF.</p>
+                <h3>Detalles de tu Reserva</h3>
                 <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 20px;">
-                    <h3>Detalles de tu Reserva</h3>
             ';
 
             $cuerpo_html .='

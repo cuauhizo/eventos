@@ -54,6 +54,22 @@
         }
         ?>
         <?php if (!empty($reservaciones)): ?>
+            <div class="reserva-item">
+                <div class="reserva-info">
+                    <h3>Bienvenida Doug Bowles</h3>
+                    <p><strong>Fecha del Evento:</strong> 2025-07-28</p>
+                    <p><strong>Hora:</strong> 10:15:00</p>
+                    <p><strong>Ubicación:</strong> Gimnasio</p>
+                </div>
+                </div>
+                <div class="reserva-item">
+                    <div class="reserva-info">
+                    <h3>Team Building in Motion</h3>
+                    <p><strong>Fecha del Evento:</strong> 2025-07-28</p>
+                    <p><strong>Hora:</strong> 11:00:00</p>
+                    <p><strong>Ubicación:</strong> Cancha Fut A</p>
+                </div>
+                </div>
             <?php
             $grupos_mostrados = [];
             foreach ($reservaciones as $reserva):
@@ -63,12 +79,7 @@
                         <h3><?php echo htmlspecialchars($reserva['nombre_evento']); ?></h3>
                         <p><strong>Fecha del Evento:</strong> <?php echo htmlspecialchars($reserva['fecha']); ?></p>
                         <p><strong>Hora:</strong> <?php echo htmlspecialchars($reserva['hora_inicio']) . ' - ' . htmlspecialchars($reserva['hora_fin']); ?></p>
-                        <p><strong>Estado:</strong>
-                            <span class="estado-reserva estado-<?php echo ($reserva['estado'] === 'cancelada') ? 'cancelada' : 'pendiente'; ?>">
-                                <?php echo htmlspecialchars($reserva['estado']); ?>
-                            </span>
-                        </p>
-                        <p>Reservado el: <?php echo htmlspecialchars($reserva['fecha_reservacion']); ?></p>
+                        <p><strong>Ubicación:</strong> <?php echo htmlspecialchars($reserva['ubicacion']); ?></p>
 
                         <!-- <?php if ($reserva['estado'] === 'pendiente'): ?>
                             <div class="reserva-actions">
@@ -82,10 +93,10 @@
                     if (!in_array($reserva['id_grupo'], $grupos_mostrados) && $reserva['estado'] !== 'cancelada'):
                         $grupos_mostrados[] = $reserva['id_grupo'];
                     ?>
-                        <div class="qr-image">
+                        <!-- <div class="qr-image">
                             <p><strong>Tu QR:</strong></p>
                             <img src="<?php echo htmlspecialchars($reserva['qr_code']); ?>" alt="Código QR de tu reserva">
-                        </div>
+                        </div> -->
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>

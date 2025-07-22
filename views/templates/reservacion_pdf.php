@@ -15,6 +15,7 @@
 </head>
 <body>
     <div class="header">
+        <img src="../../public/img/nike-logo.jpg" alt="" width="150">
         <h1>Confirmación de Reservación de Eventos</h1>
         <p>¡Gracias por tu registro, <?php echo htmlspecialchars($reservaciones[0]['nombre']); ?>!</p>
         <p>Aquí tienes el detalle de tus eventos seleccionados.</p>
