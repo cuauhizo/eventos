@@ -21,7 +21,7 @@ class Usuario {
         try {
             // Se inserta una cadena vacía ('') para la contraseña, ya que la columna no es NULLABLE.
             // La columna 'rol' se incluye explícitamente con su valor por defecto 'user'.
-            $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, acepta_contacto, rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"; 
+            $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, acepta_contacto, rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
             
             return $stmt->execute([
@@ -31,7 +31,7 @@ class Usuario {
                 $correo,
                 $id_empleado,
                 '', // CAMBIO CLAVE AQUÍ: Se pasa una cadena vacía en lugar de $password (que será null desde AuthController)
-                $acepta_contacto,
+                (int)$acepta_contacto,
                 'user' // Se asigna el rol por defecto 'user'
             ]);
         } catch (PDOException $e) {
