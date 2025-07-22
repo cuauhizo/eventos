@@ -12,19 +12,28 @@ class Usuario {
     /**
      * Inserta un nuevo usuario en la tabla 'usuarios'.
      * @param string $nombre, $apellidos, $telefono, $correo, $id_empleado.
-     * @param string|null $password La contraseña hasheada (ahora opcional/null).
+     * @param string $password La contraseña (ahora será una cadena vacía '').
      * @param int $acepta_contacto 1 si acepta, 0 si no.
      * @return bool Retorna true si la inserción fue exitosa, de lo contrario false.
      */
-    // MODIFICADO: $password se hace opcional con un valor por defecto null
-    public function crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password = null, $acepta_contacto) {
+    // MODIFICADO: $password ahora espera una cadena (aunque sea vacía)
+    public function crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto) {
         try {
-            // Asegúrate de que la columna 'password' en tu base de datos sea NULLABLE.
-            // Si no lo es, y quieres que no haya contraseña, tendrías que insertar una cadena vacía ''
-            // o un hash de una cadena vacía. Pero lo ideal es que sea NULLABLE.
-            $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, acepta_contacto, rol) VALUES (?, ?, ?, ?, ?, ?, ?, 'user')"; // Se añade 'rol' por defecto
+            // Se inserta una cadena vacía ('') para la contraseña, ya que la columna no es NULLABLE.
+            // La columna 'rol' se incluye explícitamente con su valor por defecto 'user'.
+            $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, acepta_contacto, rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"; 
             $stmt = $this->pdo->prepare($sql);
-            return $stmt->execute([$nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto]);
+            
+            return $stmt->execute([
+                $nombre,
+                $apellidos,
+                $telefono,
+                $correo,
+                $id_empleado,
+                '', // CAMBIO CLAVE AQUÍ: Se pasa una cadena vacía en lugar de $password (que será null desde AuthController)
+                $acepta_contacto,
+                'user' // Se asigna el rol por defecto 'user'
+            ]);
         } catch (PDOException $e) {
             error_log("Error al crear usuario: " . $e->getMessage());
             return false;
@@ -38,7 +47,7 @@ class Usuario {
      */
     public function existeUsuario($correo) {
         $sql = "SELECT COUNT(*) FROM usuarios WHERE correo = ?";
-        try { // Añadido try-catch para manejar errores de PDO
+        try { 
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$correo]);
             return $stmt->fetchColumn() > 0;
@@ -50,7 +59,6 @@ class Usuario {
 
     /**
      * Busca un usuario por ID de empleado.
-     * (Este método lo mencionó tu AuthController, pero no estaba en este modelo. Lo añadimos.)
      * @param string $id_empleado El ID de empleado a buscar.
      * @return array|false Retorna un array asociativo con los datos del usuario, o false si no se encuentra.
      */
@@ -73,7 +81,7 @@ class Usuario {
      */
     public function obtenerUsuarioPorCorreo($correo) {
         $sql = "SELECT * FROM usuarios WHERE correo = ?";
-        try { // Añadido try-catch para manejar errores de PDO
+        try { 
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$correo]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -85,7 +93,7 @@ class Usuario {
 
     public function obtenerTodosLosUsuarios() {
         $sql = "SELECT * FROM usuarios ORDER BY nombre ASC";
-        try { // Añadido try-catch
+        try { 
             $stmt = $this->pdo->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -96,7 +104,7 @@ class Usuario {
 
     public function obtenerTodosConRol() {
         $sql = "SELECT id_usuario, nombre, apellidos, correo, id_empleado, rol, fecha_registro FROM usuarios ORDER BY fecha_registro DESC";
-        try { // Añadido try-catch
+        try { 
             $stmt = $this->pdo->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -107,7 +115,7 @@ class Usuario {
 
     public function obtenerUsuarioPorId($id_usuario) {
         $sql = "SELECT * FROM usuarios WHERE id_usuario = ?";
-        try { // Añadido try-catch
+        try { 
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$id_usuario]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -119,7 +127,7 @@ class Usuario {
 
     public function actualizarRol($id_usuario, $rol) {
         $sql = "UPDATE usuarios SET rol = ? WHERE id_usuario = ?";
-        try { // Añadido try-catch
+        try { 
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([$rol, $id_usuario]);
         } catch (PDOException $e) {
