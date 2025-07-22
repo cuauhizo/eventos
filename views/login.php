@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Sistema de Reservas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../public/css/styles.css"> <!-- Asegúrate de que este archivo exista -->
     <style>
-        body { background-color: #f8f9fa; }
-        .login-container { max-width: 400px; margin: 80px auto; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); background-color: #fff; }
+
+        .login-container { max-width: 400px; margin: 80px auto; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         /* Estilo para el contenedor de mensajes, similar al de registro */
         #message-container { margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+        <h1 class="text-center mb-4">Iniciar Sesión</h1>
 
         <div id="message-container">
             <?php

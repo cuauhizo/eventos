@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Reservas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link as="font" crossorigin="crossorigin" href="https://www.nike.com/static/ncss/5.0/dotcom/fonts/Nike-Futura.woff2" rel="preload" type="font/woff2">
+    <link rel="stylesheet" href="../public/css/styles.css">
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .reserva-container { max-width: 800px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
-        h1, h2 { text-align: center; color: #333; }
+        .reserva-container { max-width: 450px; margin: 50px auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+
         .reserva-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 6px; display: flex; align-items: flex-start; }
         .reserva-info { flex-grow: 1; }
-        .reserva-info h3 { margin: 0 0 10px 0; color: #007bff; }
         .reserva-info p { margin: 5px 0; }
         .qr-image { text-align: center; margin-left: 20px; }
         .qr-image img { max-width: 150px; height: auto; border: 1px solid #eee; padding: 5px; }
@@ -30,15 +31,17 @@
   <!-- <pre><?php var_dump($_SESSION); ?></pre> -->
 <!-- <p>ID de usuario actual: <?php echo $_SESSION['id_usuario'] ?? 'No encontrado'; ?></p> -->
     <div class="reserva-container">
-        <div style="text-align: right; margin-bottom: 20px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <?php if (isset($_SESSION['loggedin'])): ?>
-                <p style="margin: 0;">Bienvenido, <strong><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></strong>!</p>
-                <a href="../public/index.php?action=eventos">Volver a Eventos</a> |
-                <a href="../public/index.php?action=logout">Cerrar Sesión</a>
+            <p class="mb-0">Bienvenido(a), <strong><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></strong>!</p>
+            <div>
+                <!-- <a href="../public/index.php?action=mis_reservas" class="btn btn-sm btn-outline-primary me-2">Mis Reservas</a> -->
+                <a href="../public/index.php?action=logout" class="btn btn-sm btn-danger">Cerrar Sesión</a>
+            </div>
             <?php else: ?>
-                <a href="../public/index.php?action=show_login_form">Iniciar Sesión</a>
+            <a href="../public/index.php?action=show_login_form">Iniciar Sesión</a>
             <?php endif; ?>
-        </div>
+            </div>
 
         <h1>Mis Reservaciones</h1>
 
@@ -56,16 +59,14 @@
         <?php if (!empty($reservaciones)): ?>
             <div class="reserva-item">
                 <div class="reserva-info">
-                    <h3>Bienvenida Doug Bowles</h3>
-                    <p><strong>Fecha del Evento:</strong> 2025-07-28</p>
+                    <h2>Bienvenida Doug Bowles</h2>
                     <p><strong>Hora:</strong> 10:15:00</p>
                     <p><strong>Ubicación:</strong> Gimnasio</p>
                 </div>
                 </div>
                 <div class="reserva-item">
                     <div class="reserva-info">
-                    <h3>Team Building in Motion</h3>
-                    <p><strong>Fecha del Evento:</strong> 2025-07-28</p>
+                    <h2>Team Building in Motion</h2>
                     <p><strong>Hora:</strong> 11:00:00</p>
                     <p><strong>Ubicación:</strong> Cancha Fut A</p>
                 </div>
@@ -76,8 +77,7 @@
             ?>
                 <div class="reserva-item">
                     <div class="reserva-info">
-                        <h3><?php echo htmlspecialchars($reserva['nombre_evento']); ?></h3>
-                        <p><strong>Fecha del Evento:</strong> <?php echo htmlspecialchars($reserva['fecha']); ?></p>
+                        <h2><?php echo htmlspecialchars($reserva['nombre_evento']); ?></h2>
                         <p><strong>Hora:</strong> <?php echo htmlspecialchars($reserva['hora_inicio']) . ' - ' . htmlspecialchars($reserva['hora_fin']); ?></p>
                         <p><strong>Ubicación:</strong> <?php echo htmlspecialchars($reserva['ubicacion']); ?></p>
 

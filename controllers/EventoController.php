@@ -127,13 +127,11 @@ class EventoController {
                 <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
                     <p><strong>Evento:</strong> Bienvenida Doug Bowles</p>
                     <p><strong>Ubicación:</strong> Gimnasio</p>
-                    <p><strong>Fecha:</strong> 2025-07-28</p>
                     <p><strong>Hora:</strong> 10:15:00 - 10:50:00</p>
                 </div>
                 <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
                     <p><strong>Evento:</strong> Team Building in Motion</p>
                     <p><strong>Ubicación:</strong> Cancha Fut A</p>
-                    <p><strong>Fecha:</strong> 2025-07-28</p>
                     <p><strong>Hora:</strong> 11:00:00 - 11:45:00</p>
                 </div>
             ';
@@ -143,7 +141,6 @@ class EventoController {
                     <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
                         <p><strong>Evento:</strong> ' . htmlspecialchars($reserva['nombre_evento']) . '</p>
                         <p><strong>Ubicación:</strong> ' . htmlspecialchars($reserva['ubicacion']) . '</p>
-                        <p><strong>Fecha:</strong> ' . htmlspecialchars($reserva['fecha']) . '</p>
                         <p><strong>Hora:</strong> ' . htmlspecialchars($reserva['hora_inicio']) . ' - ' . htmlspecialchars($reserva['hora_fin']) . '</p>
                     </div>
                 ';

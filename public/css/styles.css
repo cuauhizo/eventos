@@ -1,0 +1,49 @@
+/* Importa fuentes de Google Fonts si las usas */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+
+
+body {
+  /* font-family: 'Roboto', sans-serif; */
+  background: #ff3b00;
+  background-image: url('../img/back.png');
+  background-attachment: fixed;
+  background-size: cover;
+  /* background-position: center; */
+  
+}
+
+.register-container, .login-container, .eventos-container, .resumen-container, .reserva-container {
+  background-color: #000;
+  color: #FFF;
+  /* color: #CEFF00; */
+}
+
+.btn-primary, .btn.btn-primary:hover, .btn.btn-primary:focus {
+  background-color: #CEFF00;
+  border-color: #CEFF00;
+  color: #333;
+}
+
+.btn.btn-primary:hover {
+  background-color: #ccff00c8;
+  border-color: #ccff00c8;
+}
+h1{
+  color: #CEFF00;
+  font-weight: bold;
+  font-size: 2.5em;
+  text-align: center;
+}
+
+h2 { color: #ff3b00; margin: 0 0 10px 0; }
+
+/* .text-secondary {
+    font-family: "Nike Futura ND", "Helvetica Now Text Medium", Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    color: #ff7a3b!important;
+} */
+
+p.text-muted {
+  color: #eeeeee !important;
+}

@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Usuario - Sistema de Reservas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../public/css/styles.css">
     <style>
         /* CSS personalizado para el contenedor del formulario */
-        body { background-color: #f4f4f4; }
+        /* body { background-color: #f4f4f4; } */
         .register-container {
             max-width: 450px;
             margin: 50px auto;
             padding: 30px;
-            background-color: #fff;
+            /* background-color: #fff; */
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }

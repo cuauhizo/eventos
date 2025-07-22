@@ -1,0 +1,25 @@
+# .htaccess en /jdi-day-registro/
+
+# 1. Evita que se listen los contenidos de los directorios
+Options -Indexes
+
+# 2. Establece index.php como archivo por defecto si no está ya configurado globalmente
+DirectoryIndex index.php index.html index.htm
+
+# 3. Redirige la URL raíz de este directorio a tu formulario de registro
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # La RewriteBase debe coincidir con la ruta de tu subdirectorio
+    RewriteBase /jdi-day-registro/
+
+    # Redirecciona permanentemente la URL raíz (ej. /jdi-day-registro/)
+    # a la página de registro dentro de 'public'.
+    RewriteRule ^$ public/index.php?action=show_register_form [L,R=301]
+
+    # Opcional: Esto es más avanzado y se usa si quieres URLs limpias
+    # y que todas las peticiones pasen por public/index.php (como un framework MVC).
+    # Si no estás usando URLS limpias, esta parte podría no ser necesaria o causar conflictos.
+    # RewriteCond %{REQUEST_FILENAME} !-f
+    # RewriteCond %{REQUEST_FILENAME} !-d
+    # RewriteRule ^(.*)$ public/index.php [L,QSA]
+</IfModule>

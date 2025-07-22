@@ -6,16 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-s cale=1.0">
   <title>Selección de Eventos - Sistema de Reservas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link as="font" crossorigin="crossorigin" href="https://www.nike.com/static/ncss/5.0/dotcom/fonts/Nike-Futura.woff2" rel="preload" type="font/woff2">
+  <link rel="stylesheet" href="../public/css/styles.css">
   <style>
-  body {
-    background-color: #f4f4f4;
-  }
+
 
   .eventos-container {
     max-width: 1200px;
     margin: 50px auto;
     padding: 30px;
-    background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
@@ -63,9 +62,9 @@
   <div class="eventos-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <?php if (isset($_SESSION['loggedin'])): ?>
-      <p class="mb-0">Bienvenido, <strong><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></strong>!</p>
+      <p class="mb-0">Bienvenido(a), <strong><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></strong>!</p>
       <div>
-        <a href="../public/index.php?action=mis_reservas" class="btn btn-sm btn-outline-primary me-2">Mis Reservas</a>
+        <!-- <a href="../public/index.php?action=mis_reservas" class="btn btn-sm btn-outline-primary me-2">Mis Reservas</a> -->
         <a href="../public/index.php?action=logout" class="btn btn-sm btn-danger">Cerrar Sesión</a>
       </div>
       <?php else: ?>
@@ -123,7 +122,7 @@
 
     <form action="../public/index.php?action=reservar" method="POST">
       <div class="row">
-        <h2 class="mt-5 mb-3 text-center text-secondary">Indispensables</h2>
+        <h2 class="mt-5 mb-3 text-center">Indispensables</h2>
         <div class="col-md-12">
           <p class="text-center text-muted mb-4">
             <strong>Nota:</strong> Les pedimos su total atención y cooperación para estas actividades, ya que su
@@ -155,7 +154,7 @@
       <?php if (!empty($eventos_agrupados_por_horario) || !empty($eventos_preseleccionados)): ?>
 
       <?php foreach ($eventos_agrupados_por_horario as $horario_titulo => $eventos_en_horario): ?>
-      <h2 class="mt-5 mb-3 text-center text-secondary"><?php echo htmlspecialchars($horario_titulo); ?></h2>
+      <h2 class="mt-5 mb-3 text-center"><?php echo htmlspecialchars($horario_titulo); ?></h2>
       <div class="row">
         <?php foreach ($eventos_en_horario as $evento): 
                             $is_selected = in_array($evento['id_evento'], $eventos_preseleccionados);
@@ -175,14 +174,14 @@
                 id="evento-<?php echo htmlspecialchars($evento['id_evento']); ?>"
                 <?php echo $checked_attr . ' ' . $disabled_attr; ?>>
               <h5 class="card-title text-primary"><?php echo htmlspecialchars($evento['nombre_evento']); ?></h5>
-              <p class="card-text mb-1"><small class="text-muted"><strong>Categoría:</strong>
-                  <?php echo htmlspecialchars($evento['nombre_categoria']); ?></small></p>
-              <p class="card-text mb-1"><small class="text-muted"><strong>Código:</strong>
-                  <?php echo htmlspecialchars($evento['codigo_evento']); ?></small></p>
+              <!-- <p class="card-text mb-1"><small class="text-muted"><strong>Categoría:</strong>
+                  <?php echo htmlspecialchars($evento['nombre_categoria']); ?></small></p> -->
+              <!-- <p class="card-text mb-1"><small class="text-muted"><strong>Código:</strong>
+                  <?php echo htmlspecialchars($evento['codigo_evento']); ?></small></p> -->
               <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong>
                   <?php echo htmlspecialchars($evento['ubicacion']); ?></small></p>
-              <p class="card-text mb-1"><small class="text-muted"><strong>Fecha:</strong>
-                  <?php echo htmlspecialchars($evento['fecha']); ?></small></p>
+              <!-- <p class="card-text mb-1"><small class="text-muted"><strong>Fecha:</strong>
+                  <?php echo htmlspecialchars($evento['fecha']); ?></small></p> -->
               <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong>
                   <?php echo htmlspecialchars($evento['hora_inicio']) . ' - ' . htmlspecialchars($evento['hora_fin']); ?></small>
               </p>
@@ -205,7 +204,7 @@
 
       <?php if ($hay_cupo_disponible): ?>
       <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-success btn-lg mt-3">Reservar Eventos</button>
+        <button type="submit" class="btn btn-primary btn-lg mt-3">Reservar Eventos</button>
       </div>
       <?php endif; ?>
     </form>

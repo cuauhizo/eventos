@@ -27,7 +27,6 @@
                 <tr>
                     <th>Evento</th>
                     <th>Ubicación</th>
-                    <th>Fecha</th>
                     <th>Hora</th>
                 </tr>
             </thead>
@@ -35,20 +34,17 @@
                 <tr>
                     <td>Bienvenida Doug Bowles</td>
                     <td>Gimnasio</td>
-                    <td>2025-07-28</td>
                     <td>10:15:00 - 10:50:00</td>
                 </tr>
                 <tr>
                     <td>Team Building in Motion</td>
                     <td>Cancha Fut A</td>
-                    <td>2025-07-28</td>
                     <td>11:00:00 - 11:45:00</td>
                 </tr>
                 <?php foreach ($reservaciones as $reserva): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($reserva['nombre_evento']); ?></td>
                     <td><?php echo htmlspecialchars($reserva['ubicacion']); ?></td>
-                    <td><?php echo htmlspecialchars($reserva['fecha']); ?></td>
                     <td><?php echo htmlspecialchars($reserva['hora_inicio']) . ' - ' . htmlspecialchars($reserva['hora_fin']); ?></td>
                 </tr>
                 <?php endforeach; ?>
