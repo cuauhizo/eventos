@@ -215,8 +215,8 @@
   <script>
   // Función para manejar la lógica de exclusión mutua de los eventos de fútbol
   function handleFutbolConflict(checkboxId, isChecked) {
-    const ID_FASE1 = 'evento-18';
-    const ID_FASE2 = 'evento-24';
+    const ID_FASE1 = 'evento-20';
+    const ID_FASE2 = 'evento-26';
 
     // Si el checkbox no es de los eventos de fútbol, no hacer nada
     if (checkboxId !== ID_FASE1 && checkboxId !== ID_FASE2) {
@@ -294,8 +294,8 @@
 
   // Función para inicializar el estado de los eventos de fútbol al cargar la página
   document.addEventListener('DOMContentLoaded', function() {
-    const ID_FASE1 = 'evento-18';
-    const ID_FASE2 = 'evento-24';
+    const ID_FASE1 = 'evento-20';
+    const ID_FASE2 = 'evento-26';
 
     const fase1 = document.getElementById(ID_FASE1);
     const fase2 = document.getElementById(ID_FASE2);
