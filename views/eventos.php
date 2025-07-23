@@ -224,7 +224,7 @@ Doug Bowles seguida de nuestra Ceremonia de Reconomiento de Maxims.</p>
                             $checked_attr = $is_selected ? 'checked' : '';
                             $disabled_attr = $is_disabled ? 'disabled' : '';
                         ?>
-        <div class="col-md-3 mb-4">
+        <div class="col-md-6 col-lg-3 mb-4">
           <div class="card h-100 evento-item <?php echo $selected_class . ' ' . $disabled_class; ?>"
             onclick="toggleSelection(this, 'evento-<?php echo htmlspecialchars($evento['id_evento']); ?>')"
             data-block="<?php echo htmlspecialchars($horario_titulo); ?>">
