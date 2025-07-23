@@ -2,53 +2,152 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 
+/* ========================================================== */
+/* ESTILOS GLOBALES - DESKTOP FIRST (APLICAN POR DEFECTO A TODO) */
+/* ========================================================== */
 
 body {
-  /* font-family: 'Roboto', sans-serif; */
-  background: #fc3000;
-  background-image: url('../img/back.png');
-  background-attachment: fixed;
-  background-size: cover;
-  /* background-position: center; */
-  
+    font-family: 'Roboto', sans-serif; /* Fuente base */
+    background: #fc3000; /* Color de fondo sólido */
+    background-image: url('../img/back.png'); /* Imagen de fondo */
+    background-attachment: fixed; /* Imagen fija */
+    background-size: cover; /* Por defecto para escritorio: la imagen se ajusta sin cortarse */
+    background-position: center;
+    background-repeat: repeat-y;
 }
 
+/* Estilos para los contenedores principales (tarjetas de formularios/eventos) */
 .register-container, .login-container, .eventos-container, .resumen-container, .reserva-container {
-  background-color: #000;
-  color: #FFF;
-  /* color: #CEFF00; */
+    background-color: #000; /* Fondo negro para las tarjetas */
+    color: #FFF; /* Texto blanco dentro de las tarjetas */
+    padding: 30px; /* Padding por defecto para escritorio */
+    margin: 50px auto; /* Margen por defecto para escritorio (centrado horizontal) */
+    border-radius: 8px; /* Borde redondeado */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra */
 }
 
+/* Botones, encabezados, textos - Estilos para escritorio (por defecto) */
 .btn-primary, .btn.btn-primary:hover, .btn.btn-primary:focus {
-  background-color: #CEFF00;
-  border-color: #CEFF00;
-  color: #333;
+    background-color: #CEFF00; /* Color principal de botón */
+    border-color: #CEFF00;
+    color: #333; /* Color de texto en botón */
 }
 
 .btn.btn-primary:hover {
-  background-color: #ccff00c8;
-  border-color: #ccff00c8;
+    background-color: #ccff00c8; /* Color de botón al pasar el ratón */
+    border-color: #ccff00c8;
 }
 
-h1{
-  color: #CEFF00;
-  font-weight: bold;
-  font-size: 2.5em;
-  text-align: center;
+/* Encabezados y textos - Tamaños para escritorio (por defecto) */
+h1 {
+    color: #CEFF00;
+    font-weight: bold;
+    font-size: 2.5em; /* h1 más grande para escritorio */
+    text-align: center;
 }
 
-h2 { color: #fc3000; margin: 0 0 10px 0; }
-
-/* .text-secondary {
-    font-family: "Nike Futura ND", "Helvetica Now Text Medium", Helvetica, Arial, sans-serif;
-    font-weight: 500;
-    color: #ff7a3b!important;
-} */
+h2 {
+    color: #fc3000;
+    font-size: 2em; /* h2 más grande para escritorio */
+    margin: 0 0 10px 0;
+}
 
 p.text-muted {
-  color: #eeeeee !important;
+    color: #eeeeee !important; /* Color para texto muted */
+    font-size: 1em; /* Tamaño de texto muted para escritorio */
 }
 
 .text-primary {
-  color:#CEFF00 !important
+    color:#CEFF00 !important; /* Tu color verde brillante */
+}
+
+/* Estilos de tarjetas de eventos - Comunes a todos los tamaños */
+.card {
+    background: #000; /* Fondo de tarjeta (negro, sobre fondo de contenedor negro) */
+    color: #fff;
+}
+.card-text, p.card-text > small {
+    color: #fff!important;
+}
+.evento-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid #CEFF00;
+}
+.evento-item:hover {
+    border-color: #CEFF00;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
+}
+.evento-item.selected {
+    border-color: #fc3000;
+    background-color: #CEFF00;
+    box-shadow: 0 0 15px #28a74550;
+    color:#333!important;
+}
+.evento-item.selected .card-title {
+    color:#fc3000!important;
+}
+.evento-item.selected .card-text small, .evento-item.selected .card-text {
+    color: #333!important;
+}
+.evento-item.selected .cupo {
+    color: #fff !important;
+    background: #fc3000;
+}
+.evento-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    filter: grayscale(100%);
+    border-color: #dc3545;
+}
+.evento-item.disabled:hover {
+    box-shadow: none;
+    border-color: #dc3545;
+}
+.evento-item input[type="checkbox"] {
+    display: none;
+}
+.indispensables {
+    cursor: default;
+}
+.cupo {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: #CEFF00;
+    color:#333!important;
+    display: inline-block;
+}
+
+
+/* ========================================================== */
+/* MEDIA QUERIES - MOBILE / TABLET (APLICAN SOLO HASTA CIERTO ANCHO) */
+/* ========================================================== */
+
+/* Estilos para pantallas medianas y pequeñas (tabletas y móviles, hasta 767.98px) */
+@media (max-width: 767.98px) { 
+    body {
+        background-size: contain; /* En móviles, la imagen de fondo cubre el espacio, puede cortarse */
+    }
+
+    
+    /* Ajustes para contenedores en pantallas más pequeñas */
+    .register-container, .login-container, .eventos-container, .resumen-container, .reserva-container {
+      max-width: 80%!important; /* Ancho máximo del contenedor */
+        padding: 20px; /* Menor padding para móviles */
+        margin: 10px; /* Menor margen para móviles */
+    }
+
+    /* Tamaños de encabezados para pantallas más pequeñas */
+    h1 {
+        font-size: 2em; /* h1 más pequeño para móvil */
+    }
+
+    h2 {
+        font-size: 1.5em; /* h2 más pequeño para móvil */
+    }
+    
+    p.text-muted {
+        font-size: 0.9em; /* Texto muted más pequeño para móvil */
+    }
 }
