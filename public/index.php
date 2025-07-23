@@ -1,4 +1,5 @@
 <?php
+// ¡IMPORTANTE! Descomentar session_start() para que las sesiones funcionen correctamente
 // session_start();
 
 // Incluye el archivo central
@@ -39,10 +40,12 @@ switch ($action) {
             $telefono = trim($_POST['telefono'] ?? '');
             $correo = trim($_POST['correo'] ?? '');
             $id_empleado = trim($_POST['id_empleado'] ?? '');
-            $password = $_POST['password'] ?? '';
+            // CAMBIO: La variable $password ya no es necesaria, AuthController no la usa
+            // $password = $_POST['password'] ?? ''; 
             $acepta_contacto = isset($_POST['acepta_contacto']) ? 1 : 0;
 
-            $resultado = $authController->registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto);
+            // CAMBIO: No pasar $password al registrarUsuario
+            $resultado = $authController->registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $acepta_contacto);
 
             if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
                 if ($resultado === true) {
@@ -73,9 +76,11 @@ switch ($action) {
     case 'login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $correo = trim($_POST['correo'] ?? '');
-            $password = trim($_POST['password'] ?? '');
+            // CAMBIO: La variable $password ya no es necesaria, AuthController no la usa
+            // $password = trim($_POST['password'] ?? '');
 
-            $resultado = $authController->iniciarSesion($correo, $password);
+            // CAMBIO: No pasar $password al iniciarSesion
+            $resultado = $authController->iniciarSesion($correo); 
             if ($resultado === true) {
                 if ($_SESSION['rol'] === 'admin') {
                     header("Location: " . $_SERVER['PHP_SELF'] . "?action=admin_dashboard");
@@ -94,48 +99,47 @@ switch ($action) {
 
     case 'logout':
         session_destroy();
-        header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_register_form");
+        header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_register_form"); // Redirige a login después de logout
         exit();
         break;
 
     // --- ACCIONES DE USUARIO ---
-    // case 'eventos':
-    //     // **CORRECCIÓN AQUÍ:** Ya no se obtiene una lista de categorías separada
-    //     $eventos_agrupados = $eventoController->getEventosDisponiblesPorCategoria();
-    //     require_once ROOT_PATH . '/views/eventos.php';
-    //     break;
-
     case 'eventos':
-        // Esta es la línea que debe ejecutarse.
-        // El método mostrarEventos() se encarga de todo:
-        // 1. Obtener los eventos del modelo.
-        // 2. Incluir el archivo de la vista 'eventos.php'
+        if (!isset($_SESSION['loggedin'])) {
+            header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_register_form");
+            exit();
+        }
         $eventoController->mostrarEventos();
         break;
 
     case 'mis_reservas':
-        if (!isset($_SESSION['id_usuario'])) {
-            header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
+        if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id_usuario'])) { // Asegurarse de que 'loggedin' y 'id_usuario' estén seteados
+            header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_register_form");
             exit();
         }
+
         $reservaciones = $eventoController->getReservacionesDeUsuario($_SESSION['id_usuario']);
         require_once ROOT_PATH . '/views/mis_reservas.php';
         break;
 
-    // case 'mostrar_eventos':
-    //     $eventoController = new EventoController($pdo);
-    //     $eventos = $eventoController->getEventosDisponibles(); // Aquí se define la variable
-    //     require_once ROOT_PATH . '/views/eventos.php';
-    //     break;
-
     case 'reservar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Asegurarse de que el usuario esté logueado antes de permitir la reserva
+            if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id_usuario'])) {
+                header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
+                exit();
+            }
+
             $id_usuario = $_SESSION['id_usuario'];
-            $eventos_seleccionados = $_POST['eventos_seleccionados'] ?? [];
+            // Asume que eventos_seleccionados del POST son solo los opcionales
+            $eventos_seleccionados_opcionales = $_POST['eventos_seleccionados'] ?? [];
             
-            $eventoController->eliminarReservasPendientes($id_usuario);
-            
-            $resultado = $eventoController->procesarReservacion($id_usuario, $eventos_seleccionados);
+            // La lógica para eliminar reservas pendientes y procesar ahora está encapsulada en procesarReservacion
+            // y no se llama directamente aquí para evitar inconsistencias con los cupos
+            // if ($eventoController->eliminarReservasPendientes($id_usuario)) { /* ... */ } // Esta llamada está en procesarReservacion
+
+            // CAMBIO: procesarReservacion recibe solo los eventos opcionales
+            $resultado = $eventoController->procesarReservacion($id_usuario, $eventos_seleccionados_opcionales); 
             
             if (is_numeric($resultado)) {
                 $_SESSION['reserva_exito'] = true;
@@ -156,41 +160,22 @@ switch ($action) {
         break;
 
     case 'resumen_reservas':
-        $id_grupo = $_SESSION['id_grupo'] ?? null;
-        if (!$id_grupo) {
-            header("Location: " . $_SERVER['PHP_SELF'] . "?action=eventos");
-            exit();
-        }
-        $reservaciones = $eventoController->getReservacionesPorGrupo($id_grupo);
-        $eventos_seleccionados_ids = array_column($reservaciones, 'id_evento');
-        $_SESSION['eventos_preseleccionados'] = $eventos_seleccionados_ids;
-        require_once ROOT_PATH . '/views/resumen.php';
-        break;
-
-    case 'finalizar_reserva_old':
-        if (!isset($_SESSION['id_grupo'])) {
+        // Asegurarse de que el usuario esté logueado y tenga un grupo de reserva activo
+        if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id_usuario']) || !isset($_SESSION['id_grupo'])) {
             header("Location: " . $_SERVER['PHP_SELF'] . "?action=eventos");
             exit();
         }
         $id_grupo = $_SESSION['id_grupo'];
-        $resultado = $eventoController->finalizarReservacion($id_grupo);
         
-        if ($resultado === true) {
-            unset($_SESSION['id_grupo']);
-            $_SESSION['reserva_exito'] = true;
-            $_SESSION['reserva_mensaje'] = "¡Reservación finalizada y correo de confirmación enviado!";
-            header("Location: " . $_SERVER['PHP_SELF'] . "?action=mis_reservas");
-            exit();
-        } else {
-            $_SESSION['reserva_exito'] = false;
-            $_SESSION['reserva_mensaje'] = $resultado;
-            header("Location: " . $_SERVER['PHP_SELF'] . "?action=resumen_reservas");
-            exit();
-        }
+        $reservaciones = $eventoController->getReservacionesPorGrupo($id_grupo);
+        // $eventos_seleccionados_ids = array_column($reservaciones, 'id_evento'); // Esta variable no se usa en resumen.php
+        // $_SESSION['eventos_preseleccionados'] = $eventos_seleccionados_ids; // No es necesario si eventos.php los carga de DB
+        require_once ROOT_PATH . '/views/resumen.php';
         break;
 
-    case 'finalizar_reserva':
-        if (!isset($_SESSION['id_grupo'])) {
+    // CAMBIO: Se consolida la acción 'finalizar_reserva_old' con 'finalizar_reserva'
+    case 'finalizar_reserva': 
+        if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id_usuario']) || !isset($_SESSION['id_grupo'])) {
             header("Location: " . $_SERVER['PHP_SELF'] . "?action=eventos");
             exit();
         }
@@ -212,7 +197,7 @@ switch ($action) {
         break;
 
     case 'cancelar_reserva':
-        if (!isset($_SESSION['id_usuario']) || !isset($_GET['id'])) {
+        if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id_usuario']) || !isset($_GET['id'])) {
             header("Location: " . $_SERVER['PHP_SELF'] . "?action=show_login_form");
             exit();
         }
@@ -316,16 +301,6 @@ switch ($action) {
         header("Location: " . $_SERVER['PHP_SELF'] . "?action=admin_import_form");
         exit();
         break;
-
-    // case 'admin_cambiar_rol':
-    //     if (isset($_GET['id']) && isset($_GET['rol'])) {
-    //         $id_usuario = $_GET['id'];
-    //         $nuevo_rol = $_GET['rol'];
-    //         $adminController->cambiarRolUsuario($id_usuario, $nuevo_rol);
-    //     }
-    //     header("Location: " . $_SERVER['PHP_SELF'] . "?action=admin_usuarios_list");
-    //     exit();
-    //     break;
 
     // --- ACCIONES PARA MOSTRAR VISTAS ---
     case 'show_register_form':

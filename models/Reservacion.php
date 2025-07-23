@@ -8,7 +8,7 @@ class Reservacion {
     }
 
     public function iniciarGrupoReservas() {
-        $sql = "INSERT INTO grupos_reservas (qr_code) VALUES (NULL)";
+        $sql = "INSERT INTO grupos_reservas (qr_code) VALUES (NULL)"; // qr_code puede seguir siendo NULL inicialmente
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
@@ -20,6 +20,7 @@ class Reservacion {
     }
     
     public function existeReserva($id_usuario, $id_evento) {
+        // Verifica si ya hay una reserva (pendiente o confirmada) para el usuario y evento
         $sql = "SELECT COUNT(*) FROM reservaciones WHERE id_usuario = ? AND id_evento = ? AND estado IN ('pendiente', 'confirmada')";
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -32,6 +33,7 @@ class Reservacion {
     }
 
     public function crearReserva($id_usuario, $id_evento, $id_grupo) {
+        // Las reservas se crean inicialmente como 'pendiente'
         $sql = "INSERT INTO reservaciones (id_usuario, id_evento, id_grupo, estado) VALUES (?, ?, ?, 'pendiente')";
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -42,21 +44,35 @@ class Reservacion {
         }
     }
 
-    public function finalizarReservacion($id_grupo, $qr_path) {
+    // Método para guardar la ruta del QR una vez generado (llamado desde EventoController)
+    public function guardarQrPath($id_grupo, $qr_path) {
         $sql = "UPDATE grupos_reservas SET qr_code = ? WHERE id_grupo = ?";
         try {
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([$qr_path, $id_grupo]);
         } catch (PDOException $e) {
-            error_log("Error al finalizar reservación: " . $e->getMessage());
+            error_log("Error al guardar QR path en grupo de reservas: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // MÉTODO AGREGADO/CORREGIDO: Para confirmar un grupo de reservas (cambia estado a 'confirmada')
+    public function confirmarGrupoReservas($id_grupo) {
+        $sql = "UPDATE reservaciones SET estado = 'confirmada' WHERE id_grupo = ?";
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([$id_grupo]);
+        } catch (PDOException $e) {
+            error_log("Error al confirmar grupo de reservas: " . $e->getMessage());
             return false;
         }
     }
 
     public function getReservacionesPorGrupo($id_grupo) {
-        $sql = "SELECT r.*, e.nombre_evento, e.fecha, e.hora_inicio, e.ubicacion, e.descripcion 
+        $sql = "SELECT r.*, e.nombre_evento, e.fecha, e.hora_inicio, e.hora_fin, e.ubicacion, e.descripcion, u.nombre, u.correo 
                 FROM reservaciones r
                 JOIN eventos e ON r.id_evento = e.id_evento
+                JOIN usuarios u ON r.id_usuario = u.id_usuario
                 WHERE r.id_grupo = ?";
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -74,7 +90,7 @@ class Reservacion {
                 JOIN eventos e ON r.id_evento = e.id_evento
                 LEFT JOIN grupos_reservas gr ON r.id_grupo = gr.id_grupo
                 WHERE r.id_usuario = :id_usuario
-                ORDER BY e.fecha DESC, e.hora_inicio DESC";
+                ORDER BY e.fecha ASC, e.hora_inicio ASC";
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':id_usuario' => $id_usuario]);
@@ -88,13 +104,19 @@ class Reservacion {
     public function cancelarReserva($id_reservacion, $id_evento) {
         $this->pdo->beginTransaction();
         try {
-            $sql1 = "UPDATE eventos SET cupo_disponible = cupo_disponible + 1 WHERE id_evento = ?";
-            $stmt1 = $this->pdo->prepare($sql1);
-            $stmt1->execute([$id_evento]);
+            // Obtener el estado de la reserva para decidir si incrementar el cupo
+            $reserva_info = $this->getReservacionPorId($id_reservacion); 
             
-            $sql2 = "DELETE FROM reservaciones WHERE id_reservacion = ?";
-            $stmt2 = $this->pdo->prepare($sql2);
-            $stmt2->execute([$id_reservacion]);
+            $sql_delete = "DELETE FROM reservaciones WHERE id_reservacion = ?";
+            $stmt_delete = $this->pdo->prepare($sql_delete);
+            $stmt_delete->execute([$id_reservacion]);
+            
+            // Solo incrementar cupo si la reserva cancelada estaba 'confirmada'
+            if ($reserva_info && $reserva_info['estado'] === 'confirmada') {
+                $sql_update_cupo = "UPDATE eventos SET cupo_disponible = cupo_disponible + 1 WHERE id_evento = ?";
+                $stmt_update_cupo = $this->pdo->prepare($sql_update_cupo);
+                $stmt_update_cupo->execute([$id_evento]);
+            }
             
             $this->pdo->commit();
             return true;
@@ -105,8 +127,9 @@ class Reservacion {
         }
     }
 
+    // MODIFICADO: Ahora también devuelve el estado de la reserva
     public function getReservacionPorId($id_reservacion) {
-        $sql = "SELECT id_reservacion, id_evento FROM reservaciones WHERE id_reservacion = ?";
+        $sql = "SELECT id_reservacion, id_evento, estado FROM reservaciones WHERE id_reservacion = ?";
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$id_reservacion]);
@@ -120,18 +143,9 @@ class Reservacion {
     public function eliminarReservasPendientes($id_usuario) {
         $this->pdo->beginTransaction();
         try {
-            $sql_select = "SELECT id_evento FROM reservaciones WHERE id_usuario = ? AND estado = 'pendiente'";
-            $stmt_select = $this->pdo->prepare($sql_select);
-            $stmt_select->execute([$id_usuario]);
-            $eventos_pendientes = $stmt_select->fetchAll(PDO::FETCH_COLUMN);
-
-            if (!empty($eventos_pendientes)) {
-                $placeholders = implode(',', array_fill(0, count($eventos_pendientes), '?'));
-                $sql_update = "UPDATE eventos SET cupo_disponible = cupo_disponible + 1 WHERE id_evento IN ($placeholders)";
-                $stmt_update = $this->pdo->prepare($sql_update);
-                $stmt_update->execute($eventos_pendientes);
-            }
-
+            // Elimina reservas con estado 'pendiente'.
+            // Los cupos se decrementaron en procesarReservacion y se liberan en cancelarReserva (si es confirmada)
+            // o si se inicia una nueva reserva con eliminarReservasPendientes.
             $sql_delete = "DELETE FROM reservaciones WHERE id_usuario = ? AND estado = 'pendiente'";
             $stmt_delete = $this->pdo->prepare($sql_delete);
             $stmt_delete->execute([$id_usuario]);
