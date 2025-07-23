@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <title>Confirmación de Reservación</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; }
-        .header { text-align: center; margin-bottom: 25px; }
+        body { font-family: sans-serif; margin: 16px; }
+        .header { text-align: center; margin-bottom: 20px; }
         .header h1 { color: #fc3000; }
         .user-info, .events-info { margin-bottom: 20px; }
         .events-list { width: 100%; border-collapse: collapse; }
-        .events-list th, .events-list td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-        .footer { text-align: center; margin-top: 30px; color: #888; }
-        .qr-code { text-align: center; margin-top: 20px; }
+        .events-list th, .events-list td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        .footer { text-align: center; margin-top: 20px; color: #888; }
+        .qr-code { text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>

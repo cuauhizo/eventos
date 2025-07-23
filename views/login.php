@@ -37,9 +37,9 @@
 
         <form id="loginForm" action="index.php?action=login" method="POST" class="needs-validation" novalidate>
             <div class="mb-3">
-                <label for="correo" class="form-label">Correo Electrónico (Nike):</label>
-                <input type="email" class="form-control" id="correo" name="correo" value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>" required pattern=".*@tolkogroup\.com$" title="Solo se aceptan correos con el dominio @tolkogroup.com.">
-                <div class="invalid-feedback">Por favor, introduce un correo electrónico válido del dominio @tolkogroup.com.</div>
+                <label for="correo" class="form-label">Correo Electrónico:</label>
+                <input type="email" class="form-control" id="correo" name="correo" value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>" required>
+                <div class="invalid-feedback">Por favor, introduce un correo electrónico válido.</div>
             </div>
             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
         </form>

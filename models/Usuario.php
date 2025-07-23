@@ -17,21 +17,25 @@ class Usuario {
      * @return bool Retorna true si la inserción fue exitosa, de lo contrario false.
      */
     // MODIFICADO: $password ahora espera una cadena (aunque sea vacía)
-    public function crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto) {
+    // public function crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password, $acepta_contacto) {
+    public function crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password) {
+    // public function crearUsuario($nombre, $apellidos, $correo, $id_empleado, $password) {
         try {
             // Se inserta una cadena vacía ('') para la contraseña, ya que la columna no es NULLABLE.
             // La columna 'rol' se incluye explícitamente con su valor por defecto 'user'.
-            $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, acepta_contacto, rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            // $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, acepta_contacto, rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, rol) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            // $sql = "INSERT INTO usuarios (nombre, apellidos, telefono, correo, id_empleado, password, rol) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
             
             return $stmt->execute([
                 $nombre,
                 $apellidos,
-                $telefono,
+                '',
                 $correo,
                 $id_empleado,
                 '', // CAMBIO CLAVE AQUÍ: Se pasa una cadena vacía en lugar de $password (que será null desde AuthController)
-                (int)$acepta_contacto,
+                // (int)$acepta_contacto,
                 'user' // Se asigna el rol por defecto 'user'
             ]);
         } catch (PDOException $e) {

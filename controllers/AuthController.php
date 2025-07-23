@@ -20,11 +20,13 @@ class AuthController {
      * @return bool|string Retorna true si el registro fue exitoso, o un mensaje de error si falló.
      */
     // MODIFICADO: El método registrarUsuario ya no recibe $password
-    public function registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $acepta_contacto) { // Eliminado $password del parámetro
+    // public function registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $acepta_contacto) { 
+    // public function registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado) {
+    public function registrarUsuario($nombre, $apellidos, $correo, $id_empleado) {
         // --- Validaciones del lado del servidor (cruciales para la seguridad) ---
         // 1. Verificación de que los campos obligatorios no estén vacíos.
         // MODIFICADO: empty($password) ha sido eliminado de la validación
-        if (empty($nombre) || empty($apellidos) || empty($telefono) || empty($correo) || empty($id_empleado)) {
+        if (empty($nombre) || empty($apellidos) || empty($correo) || empty($id_empleado)) {
             return "Todos los campos son obligatorios.";
         }
         
@@ -35,9 +37,9 @@ class AuthController {
         if (!preg_match("/^[\p{L}\s]+$/u", $apellidos)) {
             return "Los apellidos solo pueden contener letras y espacios.";
         }
-        if (!preg_match("/^[0-9]+$/", $telefono)) {
-            return "El teléfono solo puede contener números.";
-        }
+        // if (!preg_match("/^[0-9]+$/", $telefono)) {
+        //     return "El teléfono solo puede contener números.";
+        // }
         if (!preg_match("/^[A-Za-z0-9]+$/", $id_empleado)) {
             return "El ID de empleado solo puede contener letras y números.";
         }
@@ -53,9 +55,9 @@ class AuthController {
         // }
 
         // Se cambió el dominio y la longitud del substring.
-        if (substr($correo, -15) !== '@tolkogroup.com') { // CAMBIO AQUÍ: -15 y '@tolkogroup.com'
-            return "Solo se aceptan correos electrónicos con el dominio @tolkogroup.com.";
-        }
+        // if (substr($correo, -15) !== '@tolkogroup.com') { // CAMBIO AQUÍ: -15 y '@tolkogroup.com'
+        //     return "Solo se aceptan correos electrónicos con el dominio @tolkogroup.com.";
+        // }
 
         // 5. Verificación de unicidad del correo electrónico.
         // MODIFICADO: Usar buscarPorCorreo en lugar de existeUsuario si tu modelo no tiene existeUsuario
@@ -67,13 +69,25 @@ class AuthController {
             return "El ID de empleado ya está registrado.";
         }
 
+        // SECCIÓN A ELIMINAR COMPLETAMENTE
+        // Eliminar esta validación
+        /*
+        if ($acepta_contacto !== 1) { 
+            return "Debes aceptar que se te contacte para completar el registro.";
+        }
+        */
+        // FIN SECCIÓN A ELIMINAR
+
         // CAMBIO CRÍTICO: Eliminado el cifrado de la contraseña.
         // Se pasa un valor nulo o vacío, o se ajusta el modelo para no esperar la contraseña.
         $password_placeholder = null; // O un valor vacío si la columna 'password' en tu DB no es NULLABLE
+        $telefono= null; // O un valor vacío si la columna 'telefono' en tu DB no es NULLABLE
 
         // 6. Llamada al modelo para ejecutar la inserción en la base de datos.
         // MODIFICADO: La llamada a crearUsuario ya no pasa $password directamente
-        $exito = $this->usuarioModel->crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password_placeholder, $acepta_contacto);
+        // $exito = $this->usuarioModel->crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password_placeholder, $acepta_contacto);
+        $exito = $this->usuarioModel->crearUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $password_placeholder);
+        // $exito = $this->usuarioModel->crearUsuario($nombre, $apellidos, $correo, $id_empleado, $password_placeholder);
 
         if ($exito) {
             return true;

@@ -37,7 +37,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre = trim($_POST['nombre'] ?? '');
             $apellidos = trim($_POST['apellidos'] ?? '');
-            $telefono = trim($_POST['telefono'] ?? '');
+            // $telefono = trim($_POST['telefono'] ?? '');
             $correo = trim($_POST['correo'] ?? '');
             $id_empleado = trim($_POST['id_empleado'] ?? '');
             // CAMBIO: La variable $password ya no es necesaria, AuthController no la usa
@@ -45,7 +45,8 @@ switch ($action) {
             $acepta_contacto = isset($_POST['acepta_contacto']) ? 1 : 0;
 
             // CAMBIO: No pasar $password al registrarUsuario
-            $resultado = $authController->registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $acepta_contacto);
+            // $resultado = $authController->registrarUsuario($nombre, $apellidos, $telefono, $correo, $id_empleado, $acepta_contacto);
+            $resultado = $authController->registrarUsuario($nombre, $apellidos, $correo, $id_empleado, $acepta_contacto);
 
             if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
                 if ($resultado === true) {

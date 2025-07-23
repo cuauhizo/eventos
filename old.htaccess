@@ -10,11 +10,11 @@ DirectoryIndex index.php index.html index.htm
 <IfModule mod_rewrite.c>
     RewriteEngine On
     # La RewriteBase debe coincidir con la ruta de tu subdirectorio
-    RewriteBase /jdi-day-registro/
+    RewriteBase /
 
     # Redirecciona permanentemente la URL raíz (ej. /jdi-day-registro/)
     # a la página de registro dentro de 'public'.
-    RewriteRule ^$ public/index.php?action=show_register_form [L,R=301]
+    RewriteRule ^$ public/ [L,R=301]
 
     # Opcional: Esto es más avanzado y se usa si quieres URLs limpias
     # y que todas las peticiones pasen por public/index.php (como un framework MVC).

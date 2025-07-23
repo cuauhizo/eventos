@@ -46,28 +46,28 @@
                 <input type="text" class="form-control" id="apellidos" name="apellidos" value="<?php echo htmlspecialchars($_POST['apellidos'] ?? ''); ?>" required>
                 <div class="invalid-feedback">Por favor, introduce tus apellidos.</div>
             </div>
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label for="telefono" class="form-label">Número de WhatsApp:</label>
                 <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Ej. 5512345678" required pattern="[0-9]{10}" maxlength="10" title="Solo números y 10 dígitos.">
                 <div class="invalid-feedback">Por favor, introduce 10 dígitos numéricos para el teléfono.</div>
-            </div>
+            </div> -->
             <div class="mb-3">
-                <label for="correo" class="form-label">Correo Electrónico (Nike):</label>
-                <input type="email" class="form-control" id="correo" name="correo" value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>" required pattern=".*@tolkogroup\.com$" title="Solo se aceptan correos con el dominio @tolkogroup.com.">
-                <div class="invalid-feedback">Por favor, introduce un correo electrónico válido del dominio @tolkogroup.com.</div>
+                <label for="correo" class="form-label">Correo Electrónico:</label>
+                <input type="email" class="form-control" id="correo" name="correo" value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>" required>
+                <div class="invalid-feedback">Por favor, introduce un correo electrónico válido.</div>
             </div>
             <div class="mb-3">
                 <label for="id_empleado" class="form-label">ID de Empleado:</label>
-                <input type="text" class="form-control" id="id_empleado" name="id_empleado" value="<?php echo htmlspecialchars($_POST['id_empleado'] ?? ''); ?>" required pattern="^[A-Za-z0-9]+$" title="Solo letras y números.">
+                <input type="text" class="form-control" id="id_empleado" name="id_empleado" value="<?php echo htmlspecialchars($_POST['id_empleado'] ?? ''); ?>" required pattern="^[A-Za-z0-9]+$" maxlength="10" title="Solo letras y números.">
                 <div class="invalid-feedback">Por favor, introduce tu ID de empleado (solo letras y números).</div>
             </div>
-            <div class="mb-3 form-check">
+            <!-- <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="acepta_contacto_checkbox" value="1" required <?php echo isset($_POST['acepta_contacto']) ? 'checked' : ''; ?>>
                 <label class="form-check-label" for="acepta_contacto_checkbox">Acepto que se me contacte por este medio para recibir noticias del evento.</label>
                 <div class="invalid-feedback">Debes aceptar los términos para continuar.</div>
                 
                 <input type="hidden" name="acepta_contacto" id="acepta_contacto_hidden" value="<?php echo isset($_POST['acepta_contacto']) ? '1' : '0'; ?>">
-            </div>
+            </div> -->
             <div class="d-grid gap-2">
                 <input type="submit" class="btn btn-primary" value="Registrarse">
             </div>
@@ -95,20 +95,21 @@
             // Asignación de los eventos de filtrado de entrada a cada campo por su ID.
             document.getElementById('nombre').addEventListener('input', validarSoloTexto);
             document.getElementById('apellidos').addEventListener('input', validarSoloTexto);
-            document.getElementById('telefono').addEventListener('input', validarSoloNumeros);
+            // document.getElementById('telefono').addEventListener('input', validarSoloNumeros);
             document.getElementById('id_empleado').addEventListener('input', validarAlfanumerico);
 
-            // === Lógica para sincronizar el checkbox visible con el campo oculto ===
-            // Esto asegura que el valor de 'acepta_contacto' siempre se envíe correctamente (0 o 1).
+            // SECCIÓN A ELIMINAR COMPLETAMENTE DEL JAVASCRIPT
+            // Eliminar este bloque completo si no hay más lógica de checkboxes
+            /*
             const aceptaContactoCheckbox = document.getElementById('acepta_contacto_checkbox');
             const aceptaContactoHidden = document.getElementById('acepta_contacto_hidden');
 
-            // Sincronizar el campo oculto cuando cambia el checkbox visible
             aceptaContactoCheckbox.addEventListener('change', function() {
                 aceptaContactoHidden.value = this.checked ? '1' : '0';
             });
-            // Asegurarse de que el campo oculto tenga el valor correcto al cargar la página (ej. si el formulario se repobló después de un error PHP).
             aceptaContactoHidden.value = aceptaContactoCheckbox.checked ? '1' : '0';
+            */
+            // FIN SECCIÓN A ELIMINAR DEL JAVASCRIPT
 
 
             // ==========================================================
@@ -136,7 +137,7 @@
                 
                 // PASO 3: Forzar el valor del checkbox 'acepta_contacto' en FormData
                 // Esto garantiza que el valor correcto (0 o 1) siempre se envíe, incluso si hay quirks del navegador.
-                formData.set('acepta_contacto', aceptaContactoCheckbox.checked ? '1' : '0');
+                // formData.set('acepta_contacto', aceptaContactoCheckbox.checked ? '1' : '0');
 
                 const url = form.action + '&ajax=1'; // Añadir parámetro 'ajax=1' para el servidor
 
