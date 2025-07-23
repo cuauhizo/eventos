@@ -8,7 +8,7 @@
     <link as="font" crossorigin="crossorigin" href="https://www.nike.com/static/ncss/5.0/dotcom/fonts/Nike-Futura.woff2" rel="preload" type="font/woff2">
     <link rel="stylesheet" href="../public/css/styles.css">
     <style>
-        .reserva-container { max-width: 450px; margin: 50px auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .reserva-container { max-width: 450px; margin: 50px auto; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
 
         .reserva-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 6px; display: flex; align-items: flex-start; }
         .reserva-info { flex-grow: 1; }

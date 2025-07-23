@@ -19,22 +19,47 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
+  .card {
+    background: #fc3000;
+    color: #fff;
+  }
+  .card-text, p.card-text > small {
+    color: #fff!important;
+  }
+
+
   .evento-item {
     cursor: pointer;
     transition: all 0.3s ease;
-    border: 2px solid #fff;
+    border: 2px solid #CEFF00;
   }
 
   .evento-item:hover {
-    border-color: #007bff;
+    border-color: #CEFF00;
     box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
   }
 
+
   .evento-item.selected {
-    border-color: #28a745;
-    background-color: #e9f5e9;
+    border-color: #fc3000;
+    background-color: #CEFF00;
     box-shadow: 0 0 15px #28a74550;
+    color:#333!important;
   }
+
+  .evento-item.selected .card-title{
+    color:#fc3000!important;
+  }
+
+  .evento-item.selected .card-text small, .evento-item.selected .card-text {
+    color: #333!important;
+  }
+
+  .evento-item.selected .cupo {
+    color: #fff !important;
+    background: #fc3000;
+  }
+
 
   .evento-item.disabled {
     cursor: not-allowed;
@@ -55,6 +80,15 @@
   .indispensables {
     cursor: default;
   }
+
+  .cupo{
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: #CEFF00;
+    color:#333!important;
+    display: inline-block;
+  }
   </style>
 </head>
 
@@ -74,7 +108,32 @@
 
     <h1 class="text-center mb-4">Eventos Deportivos</h1>
     <p class="text-center text-muted">Selecciona los eventos a los que te gustaría asistir (máximo 4).</p>
-
+    <p>Comenzaremos nuestro JDI Day como un solo equipo con una bienvenida a cargo de
+    nuestro VP/GM, Doug Bowles, seguida de la Ceremonia de Reconocimiento de Maxims.</p>
+    <p>La segunda actividad será una sesión de Team Building in Motion liderada por el Nike
+    Trainer Gabriel Rojo de la Vega. Invitamos a todo nuestro equipo a participar en estos dos
+    eventos. No requieren registro.</p>
+    <p>Las actividades a elegir están separadas por bloque. Podrás elegir máximo una actividad
+    por bloque para un máximo de 4 actividades en el día. Por favor considera lo siguiente al
+    escoger tus actividades:</p>
+    <ul>
+      <li>Algunas actividades tienen un cupo limitado por lo cual te recomendamos completar
+tu registro tan pronto decidas cuáles quieres.</li>
+      <li>Puedes elegir no participar en actividades en ciertos periodos. Para esto,
+simplemente no selecciones nada en ese bloque.</li>
+      <li>Hay distintos formatos para algunas de las actividades. Elige el que más te guste.</li>
+      <ul>
+        <li>Retas: juegos informales entre equipos de los cuales saldrá más de un
+equipo ganador.</li>
+        <li>Sports Labs: tu primer acercamiento a ese deporte. Este nuevo formato
+mezcla la teoría, el contexto sobre el juego, el repaso de reglas o técnicas y
+finalmente la práctica del deporte.</li>
+        <li>Torneo: juegos formales competitivos entre equipos.</li>
+      </ul>
+      <li>Como su nombre lo dice, las Actividades Abiertas son juegos recreativos en los
+cuales puedes participar con o sin registro y no tienen cupo limitado. Estarán
+abiertas durante los 4 bloques.</li>
+    </ul>
     <?php
         if (isset($_SESSION['reserva_mensaje'])):
             $alert_class = ($_SESSION['reserva_exito']) ? 'alert-success' : 'alert-danger';
@@ -122,13 +181,13 @@
 
     <form action="../public/index.php?action=reservar" method="POST">
       <div class="row">
-        <h2 class="mt-5 mb-3 text-center">Indispensables</h2>
+        <h2 class="mt-3 mb-5 text-center">Indispensables</h2>
         <div class="col-md-12">
-          <p class="text-center text-muted mb-4">
+          <!-- <p class="text-center text-muted mb-4">
             <strong>Nota:</strong> Les pedimos su total atención y cooperación para estas actividades, ya que su
             participación es fundamental para el éxito colectivo de nuestro evento. ¡Estamos ansiosos por verlos en
             acción y celebrar juntos el espíritu deportivo!
-          </p>
+          </p> -->
         </div>
         <div class="col-md-6 mb-4">
           <div class="card h-100 evento-item selected indispensables">
@@ -136,7 +195,8 @@
               <h5 class="card-title text-primary">Bienvenida Doug Bowles</h5>
               <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Gimnasio</small></p>
               <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 10:15:00 - 10:50:00</small></p>
-              <p class="card-text">lorem ipsum</p>
+              <p class="card-text">Comenzaremos nuestro JDI Day con una bienvenida de parte de nuestro VP/GM,
+Doug Bowles seguida de nuestra Ceremonia de Reconomiento de Maxims.</p>
             </div>
           </div>
         </div>
@@ -146,7 +206,7 @@
               <h5 class="card-title text-primary">Team Building in Motion</h5>
               <p class="card-text mb-1"><small class="text-muted"><strong>Ubicación:</strong> Cancha Fut A</small></p>
               <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong> 11:00:00 - 11:45:00</small></p>
-              <p class="card-text">lorem ipsum</p>
+              <p class="card-text">Sesión de calentamiento y construcción de equipo liderada por el Nike Trainer Gabriel Rojo de la Vega.</p>
             </div>
           </div>
         </div>
@@ -154,7 +214,7 @@
       <?php if (!empty($eventos_agrupados_por_horario) || !empty($eventos_preseleccionados)): ?>
 
       <?php foreach ($eventos_agrupados_por_horario as $horario_titulo => $eventos_en_horario): ?>
-      <h2 class="mt-5 mb-3 text-center"><?php echo htmlspecialchars($horario_titulo); ?></h2>
+      <h2 class="mt-3 mb-5 text-center"><?php echo htmlspecialchars($horario_titulo); ?></h2>
       <div class="row">
         <?php foreach ($eventos_en_horario as $evento): 
                             $is_selected = in_array($evento['id_evento'], $eventos_preseleccionados);
@@ -185,8 +245,9 @@
               <p class="card-text mb-1"><small class="text-muted"><strong>Hora:</strong>
                   <?php echo htmlspecialchars($evento['hora_inicio']) . ' - ' . htmlspecialchars($evento['hora_fin']); ?></small>
               </p>
-              <p class="card-text mb-1"><strong>Cupo disponible:</strong>
-                <span class="badge <?php echo ($evento['cupo_disponible'] > 0) ? 'bg-success' : 'bg-danger'; ?>">
+              <p class="card-text mb-1 cupo"><strong>Cupo disponible:</strong>
+                <!-- <span class="badge <?php echo ($evento['cupo_disponible'] > 0) ? 'bg-success' : 'bg-danger'; ?>"> -->
+                <span>
                   <?php echo htmlspecialchars($evento['cupo_disponible']); ?> /
                   <?php echo htmlspecialchars($evento['cupo_maximo']); ?>
                 </span>
@@ -214,8 +275,8 @@
   <script>
   // Función para manejar la lógica de exclusión mutua de los eventos de fútbol
   function handleFutbolConflict(checkboxId, isChecked) {
-    const ID_FASE1 = 'evento-20';
-    const ID_FASE2 = 'evento-26';
+    const ID_FASE1 = 'evento-11';
+    const ID_FASE2 = 'evento-18';
 
     // Si el checkbox no es de los eventos de fútbol, no hacer nada
     if (checkboxId !== ID_FASE1 && checkboxId !== ID_FASE2) {
@@ -293,8 +354,8 @@
 
   // Función para inicializar el estado de los eventos de fútbol al cargar la página
   document.addEventListener('DOMContentLoaded', function() {
-    const ID_FASE1 = 'evento-20';
-    const ID_FASE2 = 'evento-26';
+    const ID_FASE1 = 'evento-11';
+    const ID_FASE2 = 'evento-18';
 
     const fase1 = document.getElementById(ID_FASE1);
     const fase2 = document.getElementById(ID_FASE2);

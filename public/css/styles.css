@@ -5,7 +5,7 @@
 
 body {
   /* font-family: 'Roboto', sans-serif; */
-  background: #ff3b00;
+  background: #fc3000;
   background-image: url('../img/back.png');
   background-attachment: fixed;
   background-size: cover;
@@ -29,6 +29,7 @@ body {
   background-color: #ccff00c8;
   border-color: #ccff00c8;
 }
+
 h1{
   color: #CEFF00;
   font-weight: bold;
@@ -36,7 +37,7 @@ h1{
   text-align: center;
 }
 
-h2 { color: #ff3b00; margin: 0 0 10px 0; }
+h2 { color: #fff; margin: 0 0 10px 0; }
 
 /* .text-secondary {
     font-family: "Nike Futura ND", "Helvetica Now Text Medium", Helvetica, Arial, sans-serif;
@@ -46,4 +47,8 @@ h2 { color: #ff3b00; margin: 0 0 10px 0; }
 
 p.text-muted {
   color: #eeeeee !important;
+}
+
+.text-primary {
+  color:#CEFF00 !important
 }

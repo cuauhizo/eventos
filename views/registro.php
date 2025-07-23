@@ -22,7 +22,7 @@
 </head>
 <body>
     <div class="register-container">
-        <h1 class="text-center mb-4">Registro</h1>
+        <h1 class="text-center mb-4">Registro para<br> JDI Day</h1>
         <div id="message-container">
             <?php
             // session_start(); // Asegúrate de que session_start() esté al principio de tu archivo principal (ej. core.php o index.php)
@@ -52,7 +52,7 @@
                 <div class="invalid-feedback">Por favor, introduce 10 dígitos numéricos para el teléfono.</div>
             </div>
             <div class="mb-3">
-                <label for="correo" class="form-label">Correo Electrónico:</label>
+                <label for="correo" class="form-label">Correo Electrónico (Nike):</label>
                 <input type="email" class="form-control" id="correo" name="correo" value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>" required pattern=".*@tolkogroup\.com$" title="Solo se aceptan correos con el dominio @tolkogroup.com.">
                 <div class="invalid-feedback">Por favor, introduce un correo electrónico válido del dominio @tolkogroup.com.</div>
             </div>
