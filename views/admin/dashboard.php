@@ -127,11 +127,11 @@
                     <a href="../public/index.php?action=admin_pending_reservations" class="btn btn-outline-warning btn-sm me-2 mb-2">
                         <i class="bi bi-hourglass-split me-1"></i>Pendientes
                     </a>
-                    <a href="../public/index.php?action=admin_eventos_list" class="btn btn-outline-primary btn-sm me-2 mb-2">
-                        <i class="bi bi-calendar-event me-1"></i>Eventos
-                    </a>
                     <a href="../public/index.php?action=admin_usuarios_list" class="btn btn-outline-primary btn-sm me-2 mb-2">
                         <i class="bi bi-people me-1"></i>Usuarios
+                    </a>
+                    <a href="../public/index.php?action=admin_eventos_list" class="btn btn-outline-primary btn-sm me-2 mb-2">
+                        <i class="bi bi-calendar-event me-1"></i>Eventos
                     </a>
                     <a href="../public/index.php?action=logout" class="btn btn-danger btn-sm mb-2">
                         <i class="bi bi-box-arrow-right me-1"></i>Salir
