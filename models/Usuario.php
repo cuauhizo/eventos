@@ -106,10 +106,23 @@ class Usuario {
         }
     }
 
-    public function obtenerTodosConRol() {
-        $sql = "SELECT id_usuario, nombre, apellidos, correo, id_empleado, rol, fecha_registro FROM usuarios ORDER BY fecha_registro DESC";
+    // MODIFICADO: Ahora acepta un parámetro opcional $search_query
+    public function obtenerTodosConRol($search_query = null) {
+        $sql = "SELECT id_usuario, nombre, apellidos, correo, id_empleado, rol, fecha_registro, asistencia FROM usuarios";
+        $params = [];
+        
+        // Si hay una consulta de búsqueda, añadir la cláusula WHERE
+        if ($search_query) {
+            $sql .= " WHERE nombre LIKE ? OR apellidos LIKE ? OR correo LIKE ? OR id_empleado LIKE ?";
+            $like_term = '%' . $search_query . '%';
+            $params = [$like_term, $like_term, $like_term, $like_term];
+        }
+
+        $sql .= " ORDER BY fecha_registro ASC"; // Mantener la ordenación
+
         try { 
-            $stmt = $this->pdo->query($sql);
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params); // Ejecutar la consulta con los parámetros si existen
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error al cargar la lista de usuarios con rol: " . $e->getMessage());
@@ -136,6 +149,24 @@ class Usuario {
             return $stmt->execute([$rol, $id_usuario]);
         } catch (PDOException $e) {
             error_log("Error al actualizar rol de usuario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza el estado de asistencia de un usuario.
+     * @param int $id_usuario El ID del usuario.
+     * @param int $asistencia_estado 1 para asistió, 0 para no asistió.
+     * @return bool Retorna true si la actualización fue exitosa, de lo contrario false.
+     */
+    public function actualizarAsistencia($id_usuario, $asistencia_estado) {
+        $sql = "UPDATE usuarios SET asistencia = ? WHERE id_usuario = ?";
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            // PDO::PARAM_BOOL es una buena opción para TINYINT(1)
+            return $stmt->execute([ (int)$asistencia_estado, $id_usuario ]);
+        } catch (PDOException $e) {
+            error_log("Error al actualizar asistencia para usuario " . $id_usuario . ": " . $e->getMessage());
             return false;
         }
     }

@@ -182,4 +182,34 @@ class Reservacion {
             return "Error en la validación.";
         }
     }
+
+    public function getReservacionesConEstado($estado) {
+        $sql = "SELECT 
+                    r.id_grupo, 
+                    u.nombre AS nombre_usuario, 
+                    u.apellidos AS apellidos_usuario, 
+                    e.nombre_evento, 
+                    e.fecha AS fecha_evento, 
+                    e.hora_inicio, 
+                    e.hora_fin, 
+                    e.ubicacion,
+                    r.id_reservacion,
+                    r.estado,
+                    r.fecha_reservacion,
+                    gr.qr_code
+                FROM reservaciones r
+                JOIN eventos e ON r.id_evento = e.id_evento
+                JOIN usuarios u ON r.id_usuario = u.id_usuario
+                LEFT JOIN grupos_reservas gr ON r.id_grupo = gr.id_grupo
+                WHERE r.estado = ?
+                ORDER BY e.hora_inicio ASC";
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$estado]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener reservaciones por estado: " . $e->getMessage());
+            return [];
+        }
+    }
 }
